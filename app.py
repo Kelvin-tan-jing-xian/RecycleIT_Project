@@ -26,17 +26,16 @@ from keras.applications.resnet import decode_predictions
 import cv2
 
 
-
-
 app = Flask(__name__)
 app.secret_key = "kelvin-tan"
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-ALLOWED_EXTENSIONS = set(['jpg','jpeg','png'])
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg', 'png'])
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 
 oauth = OAuth(app)
@@ -177,61 +176,68 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/api', methods=['GET', 'POST'])
+
+@app.route('/api', methods=['POST'])
 def api():
     class_names = ['lamp', 'power_assisted_bicycle', 'printer', 'television']
     img_height = 150
     img_width = 150
     threshold = 0.52
-    if 'files[]' not in request.files:
-        resp = jsonify({'message': 'No file part in the request'})
-        resp.status_code = 400
-        return resp
-    files = request.files.getlist('files[]')
+    showRegulated = False
+    showNon = False
+    if 'file' not in request.files:
+        flash('File input cannot be empty!')
+        return render_template('index.html', user=current_user)
+    file = request.files['file']
+    if file.filename == '':
+        flash('No image selected for uploading')
+        return render_template('index.html', user=current_user)
     errors = {}
     success = False
 
-    for file in files:
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            success = True
-        else:
-            errors[file.filename] = 'File type is not allowed'
-    if success and errors:
-        errors['message'] = 'File(s) successfully uploaded'
-        resp = jsonify(errors)
-        resp.status_code = 500
-        return resp
-    if success:
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash("Image successfully uploaded and displayed below")
         print("filename = ", filename)
         path = 'static/uploads/{}'.format(filename)
         img = cv2.imread(path)
-        img = cv2.resize(img, (img_height,img_width))
+        img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
         model = load_model('resnet50-saved-model-46-val_acc-0.76.hdf5')
         print("model loaded successfully")
         predictions = model.predict(np.array([img_normalized]))
         print("Predictions = ", predictions)
-        array = predictions[np.argmax(predictions)]
-        index = np.argmax(array)
-        print("Highest prediction value = ", array[index])
-
-        if array[index] > threshold:
+        print("Highest value = ", np.amax(predictions))
+        if np.amax(predictions) > threshold:
             item = class_names[np.argmax(predictions)]
             print("Item = ", item)
-            resp = jsonify({'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
-
+            resp = jsonify(
+                {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
+            print(
+                'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item))
+            showRegulated = True
         else:
+            item = ""
             resp = jsonify({'message': 'This is a non regulated e waste'})
+            print('This is a non regulated e waste')
+            showNon = True
+        # resp.status_code = 201
+        # return resp
 
-        resp.status_code = 201
-        return resp
+        return render_template('index.html', filename=filename, user=current_user, item=item, showRegulated=showRegulated, showNon=showNon
+                               )
     else:
-        resp = jsonify(errors)
-        resp.status_code = 500
-        return resp
+        flash('Allowed image types are - png, jpg, jpeg, gif', category='error')
+        return render_template('index.html', user=current_user)
+
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    return redirect(url_for('static', filename='uploads/' + filename), code=301)
+
+
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)

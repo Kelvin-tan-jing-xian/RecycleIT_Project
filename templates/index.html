@@ -15,6 +15,55 @@ Demo App
       </div>
       <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
         frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>    
+        allowfullscreen>
+      </iframe>
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-success alert-dismissable" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="close">
+          <span aria-hidden="true">x</span>
+        </button>
+        {{message}}
+      </div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      <br>
+      <br>
+      <br>
+
+      <h1>Upload your e waste here and we will tell you more about it VVVV</h1>
+      {% if filename %}
+      <div style="padding:20px">
+        <img src="{{ url_for('display_image', filename=filename)}}">
+      </div>
+      {% endif %}
+      <div class="row">
+        <form method="post" action="/api" enctype="multipart/form-data">
+          <dl>
+            <p>
+              <input type="file" name="file" class="form-control" autocomplete="off" required>
+            </p>
+          </dl>
+          <p>
+            <input type="submit" value="Submit" class="btn btn-info">
+          </p>
+        </form>
+      </div>
+      {% if showRegulated %}
+
+      <p class="lead">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. Go ahead and recycle it!</p>
+      {% elif showNon %}
+
+      <p class="lead">This is a <b>NON REGULATED E WASTE</b>. Please <b>DO NOT</b> throw it into ALBA bins.
+      </p>
+      {% endif %}
+
+    
+
+
+
     </div>
 {% endblock %}
