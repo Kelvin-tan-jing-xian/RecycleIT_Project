@@ -179,7 +179,8 @@ def logout():
 
 @app.route('/api', methods=['POST'])
 def api():
-    class_names = ['lamp', 'power_assisted_bicycle', 'printer', 'television']
+    class_names = ['electric_vehicle_battery', 'lamp',
+                   'power_assisted_bicycle', 'printer', 'television']
     img_height = 150
     img_width = 150
     threshold = 0.52
@@ -205,7 +206,7 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model = load_model('resnet50-saved-model-46-val_acc-0.76.hdf5')
+        model = load_model('resnet50-saved-model-26-val_acc-0.68.hdf5')
         print("model loaded successfully")
         predictions = model.predict(np.array([img_normalized]))
         print("Predictions = ", predictions)
@@ -216,7 +217,7 @@ def api():
             resp = jsonify(
                 {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
             print(
-                'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item))
+                'This is a/an {} and it is a regulated e waste. Go ahead and recycle it!'.format(item))
             showRegulated = True
         else:
             item = ""

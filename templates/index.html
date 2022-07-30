@@ -5,18 +5,19 @@ Demo App
 {% endblock %}
 
 
+<link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}">
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous"></script>
 {% block content %}
 
     <div class="container">
 
       <div class="starter-template">
         <h1>Index page</h1>
-        <p class="lead">Watch this quick video below to understand e recycling better!<br> You are making your first step in creating a better world!</p>
+
+
+    
       </div>
-      <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
-        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -33,33 +34,51 @@ Demo App
       <br>
       <br>
       <br>
-
-      <h1>Upload your e waste here and we will tell you more about it VVVV</h1>
+      
       {% if filename %}
       <div style="padding:20px">
         <img src="{{ url_for('display_image', filename=filename)}}">
       </div>
       {% endif %}
-      <div class="row">
-        <form method="post" action="/api" enctype="multipart/form-data">
-          <dl>
-            <p>
-              <input type="file" name="file" class="form-control" autocomplete="off" required>
-            </p>
-          </dl>
-          <p>
-            <input type="submit" value="Submit" class="btn btn-info">
-          </p>
-        </form>
-      </div>
+      <br>
       {% if showRegulated %}
-
-      <p class="lead">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. Go ahead and recycle it!</p>
+      
+      <p class="lead">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. Go ahead and recycle it!
+      </p>
       {% elif showNon %}
-
+      
       <p class="lead">This is a <b>NON REGULATED E WASTE</b>. Please <b>DO NOT</b> throw it into ALBA bins.
       </p>
       {% endif %}
+
+
+      <div class="main">
+        <div class="wrapper">
+          <header>Upload E Waste Image</header>
+          <form id="uploadImage" method="post" action="/api" enctype="multipart/form-data">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Upload a picture of your e waste :)</p>
+      
+            <input type="file" id="uploadFile" name="file" class="file-input" hidden required>
+      
+            <br>
+      
+            <input type="submit" id="submit-button" value="Submit" class="btn btn-info">
+      
+          </form>
+        </div>
+      
+      </div>
+      <br>
+      <br>
+      <p class="lead">Watch this quick video below to understand e recycling better!<br> You are making your first step in
+        creating a better world!</p>
+      <br>
+      <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
+        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+
 
     
 
