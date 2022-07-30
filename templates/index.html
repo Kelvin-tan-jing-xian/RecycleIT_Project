@@ -37,17 +37,17 @@ Demo App
       
       {% if filename %}
       <div style="padding:20px">
-        <img src="{{ url_for('display_image', filename=filename)}}">
+        <img width="280" height="280" src="{{ url_for('display_image', filename=filename)}}">
       </div>
       {% endif %}
       <br>
       {% if showRegulated %}
       
-      <p class="lead">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. Go ahead and recycle it!
+      <p class="lead" style="font-size:16px;">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. Go ahead and bring it down to ALBA's <a href="https://alba-ewaste.sg/drop-off-locations/" style="text-decoration: underline;">drop-off location</a>. Feeling lazy? You can request for <a style="text-decoration: underline;" href="https://alba-ewaste.sg/doorstep-collection/">doorstep collection</a> instead!
       </p>
       {% elif showNon %}
       
-      <p class="lead">This is a <b>NON REGULATED E WASTE</b>. Please <b>DO NOT</b> throw it into ALBA bins.
+      <p class="lead" style="font-size:16px;">This is a <b>NON REGULATED E WASTE</b>. Please <b>DO NOT</b> throw it into ALBA bins. Instead, bring it down to ALBA's  <a style="text-decoration: underline;" href="https://www.alba-wh.sg/map.html">CFT(Cash For Trash) station</a>.
       </p>
       {% endif %}
 

@@ -181,8 +181,8 @@ def logout():
 def api():
     class_names = ['electric_vehicle_battery', 'lamp',
                    'power_assisted_bicycle', 'printer', 'television']
-    img_height = 150
-    img_width = 150
+    img_height = 180
+    img_width = 180
     threshold = 0.52
     showRegulated = False
     showNon = False
@@ -206,13 +206,13 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model = load_model('resnet50-saved-model-26-val_acc-0.68.hdf5')
+        model_kelvin = load_model('cnn-saved-model-39-val_acc-0.806.hdf5')
         print("model loaded successfully")
-        predictions = model.predict(np.array([img_normalized]))
-        print("Predictions = ", predictions)
-        print("Highest value = ", np.amax(predictions))
-        if np.amax(predictions) > threshold:
-            item = class_names[np.argmax(predictions)]
+        predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
+        print("Predictions = ", predictions_kelvin)
+        print("Highest value = ", np.amax(predictions_kelvin))
+        if np.amax(predictions_kelvin) > threshold:
+            item = class_names[np.argmax(predictions_kelvin)]
             print("Item = ", item)
             resp = jsonify(
                 {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
