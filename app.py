@@ -137,9 +137,8 @@ def dashboard():
 
 
 @app.route('/education')
-@login_required
 def education():
-    return render_template('education.html', name=current_user.username, user=current_user)
+    return render_template('education.html', user=current_user)
 
 
 @app.route("/viewAllUsers")
