@@ -185,17 +185,19 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
 
-    class_names = ['electric vehicle battery', 'lamp',
-                   'power assisted bicycle', 'printer', 'television', 'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 'dryer', 'monitor', 'personal mobility device']
+    class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television', 
+                    'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 
+                    'dryer', 'monitor', 'personal mobility device','electric mobility device', 
+                    'mobile phone', 'network hub', 'set top box', 'washing machine']
 
     ICT_subcategory = ["printer", "router", "modem", "emc class b network switch",
-                       "mobile smartphone", "network hub", "set top box", "monitor", "consumer computer"]
+                       "mobile phone", "network hub", "set top box", "monitor", "consumer computer"]
     Household_subcategory = [
         "television", "refrigerator", "washing machine", "dryer", "aircon"]
     ElectricMobilityDevice_subcategory = [
         "power assisted bicycle", "electric mobility device", 'personal mobility device']
     Batteries_subcategory = ["electric vehicle battery", "portable battery"]
-    Lamps_subcategory = ["consumer lamp"]
+    Lamps_subcategory = ["lamp"]
     img_height = 180
     img_width = 180
     threshold = 0.52
@@ -223,15 +225,17 @@ def api():
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
         model_trumen = load_model('trumen-saved-model-56-val_acc-0.909.hdf5')
-        model_geoffrey = load_model(
-            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
         print("model loaded successfully")
+
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
         predictions_trumen = model_trumen.predict(np.array([img_normalized]))
-        predictions_geoffrey = model_geoffrey.predict(
-            np.array([img_normalized]))
+        predictions_geoffrey = model_geoffrey.predict(np.array([img_normalized]))
+        predictions_khei = model_khei.predict(np.array([img_normalized]))
+
         predictions_concat = np.concatenate(
-            (predictions_kelvin, predictions_trumen, predictions_geoffrey), axis=None)
+            (predictions_kelvin, predictions_trumen, predictions_geoffrey, predictions_khei), axis=None)
         print("Predictions concat = ", predictions_concat)
         print("Highest value = ", np.amax(predictions_concat))
         if np.amax(predictions_concat) > threshold:
