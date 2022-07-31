@@ -187,7 +187,8 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
     class_names = ['electric_vehicle_battery', 'lamp',
-                   'power_assisted_bicycle', 'printer', 'television','Router','battery','modem','refrigerator']
+                   'power_assisted_bicycle', 'printer', 'television','Router','battery','modem','refrigerator'
+                   , 'aircon', 'consumer computer', 'dryer', 'monitor', 'personal mobility device']
     img_height = 180
     img_width = 180
     threshold = 0.52
@@ -215,12 +216,13 @@ def api():
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-39-val_acc-0.806.hdf5')
         model_trumen = load_model('trumen-saved-model-56-val_acc-0.909.hdf5')
+        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
         print("model loaded successfully")
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
         predictions_trumen = model_trumen.predict(np.array([img_normalized]))
-        predictions_concat = np.concatenate((predictions_kelvin, predictions_trumen), axis=None)
+        predictions_geoffrey = model_geoffrey.predict(np.array([img_normalized]))
+        predictions_concat = np.concatenate((predictions_kelvin, predictions_trumen,predictions_geoffrey), axis=None)
         print("Predictions concat = ", predictions_concat)
-        print("Predictions = ", predictions_kelvin)
         print("Highest value = ", np.amax(predictions_concat))
         if np.amax(predictions_concat) > threshold:
             item = class_names[np.argmax(predictions_concat)]
