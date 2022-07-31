@@ -185,12 +185,12 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
 
-    class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television', 
-                    'router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 
-                    'dryer', 'monitor', 'personal mobility device','electric mobility device', 
-                    'mobile phone', 'network hub', 'set top box', 'washing machine']
+    class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television',
+                   'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer',
+                   'dryer', 'monitor', 'personal mobility device', 'electric mobility device',
+                   'mobile phone', 'network hub', 'set top box', 'washing machine']
 
-    ICT_subcategory = ["printer", "router", "modem", "emc class b network switch",
+    ICT_subcategory = ["printer", "Router", "modem", "emc class b network switch",
                        "mobile phone", "network hub", "set top box", "monitor", "consumer computer"]
     Household_subcategory = [
         "television", "refrigerator", "washing machine", "dryer", "aircon"]
@@ -225,13 +225,15 @@ def api():
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
         model_trumen = load_model('trumen-saved-model-56-val_acc-0.909.hdf5')
-        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_geoffrey = load_model(
+            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
         model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
         print("model loaded successfully")
 
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
         predictions_trumen = model_trumen.predict(np.array([img_normalized]))
-        predictions_geoffrey = model_geoffrey.predict(np.array([img_normalized]))
+        predictions_geoffrey = model_geoffrey.predict(
+            np.array([img_normalized]))
         predictions_khei = model_khei.predict(np.array([img_normalized]))
 
         predictions_concat = np.concatenate(
