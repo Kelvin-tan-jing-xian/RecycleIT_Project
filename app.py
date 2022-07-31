@@ -186,7 +186,7 @@ def logout():
 def api():
 
     class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television', 
-                    'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 
+                    'router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 
                     'dryer', 'monitor', 'personal mobility device','electric mobility device', 
                     'mobile phone', 'network hub', 'set top box', 'washing machine']
 
@@ -196,7 +196,7 @@ def api():
         "television", "refrigerator", "washing machine", "dryer", "aircon"]
     ElectricMobilityDevice_subcategory = [
         "power assisted bicycle", "electric mobility device", 'personal mobility device']
-    Batteries_subcategory = ["electric vehicle battery", "portable battery"]
+    Batteries_subcategory = ["electric vehicle battery", "battery"]
     Lamps_subcategory = ["lamp"]
     img_height = 180
     img_width = 180
