@@ -186,11 +186,11 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
 
-    class_names = ['electric_vehicle_battery', 'lamp',
-                   'power_assisted_bicycle', 'printer', 'television', 'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 'dryer', 'monitor', 'personal mobility device']
+    class_names = ['electric vehicle battery', 'lamp',
+                   'power assisted bicycle', 'printer', 'television', 'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer', 'dryer', 'monitor', 'personal mobility device']
 
     ICT_subcategory = ["printer", "router", "modem", "emc class b network switch",
-                       "mobile smartphone", "network hub", "set top box", "desktop monitor", "consumer computer"]
+                       "mobile smartphone", "network hub", "set top box", "monitor", "consumer computer"]
     Household_subcategory = [
         "television", "refrigerator", "washing machine", "dryer", "aircon"]
     ElectricMobilityDevice_subcategory = [
