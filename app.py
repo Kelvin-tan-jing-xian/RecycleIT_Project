@@ -179,8 +179,17 @@ def logout():
 
 @app.route('/api', methods=['POST'])
 def api():
+
     class_names = ['electric_vehicle_battery', 'lamp',
                    'power_assisted_bicycle', 'printer', 'television']
+    ICT_subcategory = ["printer", "router", "modem", "emc class b network switch",
+                       "mobile smartphone", "network hub", "set top box", "desktop monitor", "consumer computer"]
+    Household_subcategory = [
+        "television", "refrigerator", "washing machine", "dryer", "aircon"]
+    ElectricMobilityDevice_subcategory = [
+        "power assisted bicycle", "electric mobility device", 'personal mobility device']
+    Batteries_subcategory = ["electric vehicle battery", "portable battery"]
+    Lamps_subcategory = ["consumer lamp"]
     img_height = 180
     img_width = 180
     threshold = 0.52
@@ -206,7 +215,7 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('cnn-saved-model-39-val_acc-0.806.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-39-val_acc-0.806.hdf5')
         print("model loaded successfully")
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
         print("Predictions = ", predictions_kelvin)
@@ -214,20 +223,46 @@ def api():
         if np.amax(predictions_kelvin) > threshold:
             item = class_names[np.argmax(predictions_kelvin)]
             print("Item = ", item)
-            resp = jsonify(
-                {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
+            for i in ICT_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "ICT"
+
+            for i in Household_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Household Appliances"
+
+            for i in ElectricMobilityDevice_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Electric Mobility Device"
+
+            for i in Batteries_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Batteries"
+
+            for i in Lamps_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Lamps"
+            #resp = jsonify({'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
             print(
                 'This is a/an {} and it is a regulated e waste. Go ahead and recycle it!'.format(item))
             showRegulated = True
         else:
             item = ""
-            resp = jsonify({'message': 'This is a non regulated e waste'})
-            print('This is a non regulated e waste')
+            subcategory = ""
+            #resp = jsonify({'message': 'This is a non regulated e waste'})
+            print('This is a picture of non regulated e waste')
             showNon = True
+
         # resp.status_code = 201
         # return resp
 
-        return render_template('index.html', filename=filename, user=current_user, item=item, showRegulated=showRegulated, showNon=showNon
+        return render_template('index.html',
+                               filename=filename,
+                               user=current_user,
+                               item=item,
+                               showRegulated=showRegulated,
+                               showNon=showNon,
+                               subcategory=subcategory
                                )
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif', category='error')
