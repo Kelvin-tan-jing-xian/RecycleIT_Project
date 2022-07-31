@@ -136,6 +136,13 @@ def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
 
 
+@app.route('/education')
+@login_required
+def education():
+    return render_template('education.html', name=current_user.username, user=current_user)
+
+
+
 @app.route("/viewAllUsers")
 @login_required
 def viewAllUsers():
@@ -180,7 +187,7 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
     class_names = ['electric_vehicle_battery', 'lamp',
-                   'power_assisted_bicycle', 'printer', 'television']
+                   'power_assisted_bicycle', 'printer', 'television','Router','battery','modem','refrigerator']
     img_height = 180
     img_width = 180
     threshold = 0.52
@@ -206,13 +213,17 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('cnn-saved-model-39-val_acc-0.806.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-39-val_acc-0.806.hdf5')
+        model_trumen = load_model('trumen-saved-model-56-val_acc-0.909.hdf5')
         print("model loaded successfully")
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
+        predictions_trumen = model_trumen.predict(np.array([img_normalized]))
+        predictions_concat = np.concatenate((predictions_kelvin, predictions_trumen), axis=None)
+        print("Predictions concat = ", predictions_concat)
         print("Predictions = ", predictions_kelvin)
-        print("Highest value = ", np.amax(predictions_kelvin))
-        if np.amax(predictions_kelvin) > threshold:
-            item = class_names[np.argmax(predictions_kelvin)]
+        print("Highest value = ", np.amax(predictions_concat))
+        if np.amax(predictions_concat) > threshold:
+            item = class_names[np.argmax(predictions_concat)]
             print("Item = ", item)
             resp = jsonify(
                 {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})

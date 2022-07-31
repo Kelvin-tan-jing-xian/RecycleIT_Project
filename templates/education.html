@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+Demo App
+{% endblock %}
+
+
+<link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}">
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous"></script>
+
+
+{% block content %}
+
+    <div class="container">
+
+      <div class="starter-template">
+        <h1>Education</h1>
+
+
+    
+      </div>
+
+      
+    
+      <br>
+      <p class="lead">Watch this quick video below to understand e recycling better!<br> You are making your first step in
+        creating a better world!</p>
+      <br>
+      <center>
+      <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
+        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      </center>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
+
+      <img src="/static/images/SHSSPoster.png"  class="center">
+
+      <img src="/static/images/SHSSPoster2.png" width: 10px height: 100" class="center">
+
+
+
+      <h1> Interested to learn more? Join our forum discussion page!</h1>
+      <center>
+      <a href="https://www.reddit.com/r/ALBA_Ewaste/">
+        <img src="/static/images/SHSSPoster2.png"
+        width=150" height="70">
+     </a>
+     <iframe src="https://www.reddit.com/r/ALBA_Ewaste/" name="AlbaForumPage" height="300px" width="100%" title="AlbaForumPage"></iframe>
+    </center>
+      
+    
+
+
+    
+
+
+
+    </div>
+
+
+
+
+    
+{% endblock %}
+
+<css>
+
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+  }
+  
+</css>
