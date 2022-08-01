@@ -179,7 +179,7 @@ def logout():
 
 @app.route('/api', methods=['POST'])
 def api():
-    class_names = ['lamp', 'power_assisted_bicycle', 'printer', 'television']
+    class_names = ['lamp', 'power_assisted_bicycle', 'printer', 'television', 'aircon', 'desktop monitor', 'dryer', 'consumer computer', 'personal mobility device']
     img_height = 150
     img_width = 150
     threshold = 0.52
@@ -205,7 +205,8 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model = load_model('resnet50-saved-model-46-val_acc-0.76.hdf5')
+        kelvin_model = load_model('resnet50-saved-model-46-val_acc-0.76.hdf5')
+        geoffrey_model = load_model('')
         print("model loaded successfully")
         predictions = model.predict(np.array([img_normalized]))
         print("Predictions = ", predictions)
