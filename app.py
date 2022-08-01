@@ -190,11 +190,11 @@ def logout():
 def api():
 
     class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television',
-                   'Router', 'battery', 'modem', 'refrigerator', 'aircon', 'consumer computer',
+                   'Router', 'battery', 'modem', 'network switch', 'refrigerator', 'aircon', 'consumer computer',
                    'dryer', 'monitor', 'personal mobility device', 'electric mobility device',
                    'mobile phone', 'network hub', 'set top box', 'washing machine']
 
-    ICT_subcategory = ["printer", "Router", "modem", "emc class b network switch",
+    ICT_subcategory = ["printer", "Router", "modem", "network switch",
                        "mobile phone", "network hub", "set top box", "monitor", "consumer computer"]
     Household_subcategory = [
         "television", "refrigerator", "washing machine", "dryer", "aircon"]
@@ -228,9 +228,8 @@ def api():
         img_normalized = img/255
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
-        model_trumen = load_model('trumen-saved-model-59-val_acc-0.909.hdf5')
-        model_geoffrey = load_model(
-            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
+        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
         model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
         print("model loaded successfully")
 
