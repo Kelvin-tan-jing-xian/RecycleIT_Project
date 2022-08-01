@@ -11,7 +11,7 @@ p {
   line-height: 30px;
 }
 a {
-  text-decoration: none!important;
+  text-decoration: underline;
 }
 ul {
   padding: 0;
