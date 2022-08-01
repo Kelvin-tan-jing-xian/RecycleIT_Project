@@ -136,6 +136,15 @@ def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
 
 
+@app.route('/education')
+def education():
+    return render_template('education.html', user=current_user)
+
+@app.route('/types_of_ewaste')
+def types_of_ewaste():
+    return render_template('types_of_ewaste.html', user=current_user)
+
+
 @app.route("/viewAllUsers")
 @login_required
 def viewAllUsers():
@@ -179,9 +188,22 @@ def logout():
 
 @app.route('/api', methods=['POST'])
 def api():
-    class_names = ['lamp', 'power_assisted_bicycle', 'printer', 'television', 'aircon', 'desktop monitor', 'dryer', 'consumer computer', 'personal mobility device']
-    img_height = 150
-    img_width = 150
+
+    class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television',
+                   'Router', 'battery', 'modem', 'network switch', 'refrigerator', 'aircon', 'consumer computer',
+                   'dryer', 'monitor', 'personal mobility device', 'electric mobility device',
+                   'mobile phone', 'network hub', 'set top box', 'washing machine']
+
+    ICT_subcategory = ["printer", "Router", "modem", "network switch",
+                       "mobile phone", "network hub", "set top box", "monitor", "consumer computer"]
+    Household_subcategory = [
+        "television", "refrigerator", "washing machine", "dryer", "aircon"]
+    ElectricMobilityDevice_subcategory = [
+        "power assisted bicycle", "electric mobility device", 'personal mobility device']
+    Batteries_subcategory = ["electric vehicle battery", "battery"]
+    Lamps_subcategory = ["lamp"]
+    img_height = 180
+    img_width = 180
     threshold = 0.52
     showRegulated = False
     showNon = False
@@ -205,29 +227,65 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        kelvin_model = load_model('resnet50-saved-model-46-val_acc-0.76.hdf5')
-        geoffrey_model = load_model('')
+        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
+        model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
+        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
         print("model loaded successfully")
-        predictions = model.predict(np.array([img_normalized]))
-        print("Predictions = ", predictions)
-        print("Highest value = ", np.amax(predictions))
-        if np.amax(predictions) > threshold:
-            item = class_names[np.argmax(predictions)]
+
+        predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
+        predictions_trumen = model_trumen.predict(np.array([img_normalized]))
+        predictions_geoffrey = model_geoffrey.predict(
+            np.array([img_normalized]))
+        predictions_khei = model_khei.predict(np.array([img_normalized]))
+
+        predictions_concat = np.concatenate(
+            (predictions_kelvin, predictions_trumen, predictions_geoffrey, predictions_khei), axis=None)
+        print("Predictions concat = ", predictions_concat)
+        print("Highest value = ", np.amax(predictions_concat))
+        if np.amax(predictions_concat) > threshold:
+            item = class_names[np.argmax(predictions_concat)]
             print("Item = ", item)
-            resp = jsonify(
-                {'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
+            for i in ICT_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "ICT"
+
+            for i in Household_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Household Appliances"
+
+            for i in ElectricMobilityDevice_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Electric Mobility Device"
+
+            for i in Batteries_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Batteries"
+
+            for i in Lamps_subcategory:
+                if i.lower() == item.lower():
+                    subcategory = "Lamps"
+            #resp = jsonify({'message': 'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item)})
             print(
-                'This is a/an {} and it is a regulated e waste. Feel free to recycle it!'.format(item))
+                'This is a/an {} and it is a regulated e waste. Go ahead and recycle it!'.format(item))
             showRegulated = True
         else:
             item = ""
-            resp = jsonify({'message': 'This is a non regulated e waste'})
-            print('This is a non regulated e waste')
+            subcategory = ""
+            #resp = jsonify({'message': 'This is a non regulated e waste'})
+            print('This is a picture of non regulated e waste')
             showNon = True
+
         # resp.status_code = 201
         # return resp
 
-        return render_template('index.html', filename=filename, user=current_user, item=item, showRegulated=showRegulated, showNon=showNon
+        return render_template('index.html',
+                               filename=filename,
+                               user=current_user,
+                               item=item,
+                               showRegulated=showRegulated,
+                               showNon=showNon,
+                               subcategory=subcategory
                                )
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif', category='error')

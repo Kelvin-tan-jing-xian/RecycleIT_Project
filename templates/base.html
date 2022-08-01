@@ -6,48 +6,66 @@
         <!-- Bootstrap -->
         <link href="{{bootstrap_find_resource('css/bootstrap.css', cdn='bootstrap')}}" rel="stylesheet">
         <link rel="stylesheet" href="{{url_for('.static', filename='/css/base.css')}}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/">
+        <link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}"> 
+        <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+       <!-- Bootstrap core CSS -->
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
 
         {%- endblock styles %}
 
     </head>
     <body>
-        <nav class="navbar navbar-dark navbar-fixed-top bg-success">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                        aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="/">RecycleIT</a>
-                </div>
-                {% if user.is_authenticated %}
-                    <div id="navbar" class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav navbar-right">
-                            <li><a href="/dashboard">Dashboard</a></li>
-                            <li><a href="#">Settings</a></li>
-                            <li><a href="#">Profile</a></li>
-                            <li><a href="{{ url_for('logout') }}">Log Out</a></li>
-                        </ul>
-                        <form class="navbar-form navbar-right">
-                            <input type="text" class="form-control" placeholder="Search...">
-                        </form>
-                    </div>
-                {% else %}
-                    <div id="navbar" class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav navbar-right">
-                            <!-- <li class="active"><a href="/">Home</a></li> -->
-                            <li><a href="/">Home</a></li>
-                            <li><a href="{{ url_for('login') }}">Login</a></li>
-                            <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
-                        </ul>
-                    </div>
-                {% endif %}        
-                <!--/.nav-collapse -->
-            </div>
+      <header class="">
+        <nav class="navbar navbar-expand-lg navbar-fixed-top">
+          <div class="container">
+              <!-- <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></ span>
+                  </button>
+                  
+              </div> -->
+              
+              <a class="navbar-brand" href="/" style="text-decoration:none;"><h2>RecycleIT</h2></a>
+              {% if user.is_authenticated %}
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                      <ul class="nav navbar-nav navbar-right">
+                          <li><a href="/dashboard" style="text-decoration:none;">Dashboard</a></li>
+                          <li><a href="/education" style="text-decoration:none;">Education</a></li>
+                          <li><a href="#" style="text-decoration:none;">Settings</a></li>
+                          <li><a href="#" style="text-decoration:none;">Profile</a></li>
+                          <li><a href="{{ url_for('logout') }}" style="text-decoration:none;"></a>>Log Out</a></li>
+                      </ul>
+                      <form class="navbar-form navbar-right">
+                          <input type="text" class="form-control" placeholder="Search...">
+                      </form>
+                  </div>
+              {% else %}
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                      <ul class="nav navbar-nav navbar-right">
+                          <!-- <li class="active"><a href="/">Home</a></li> -->
+                          <li><a href="/" style="text-decoration:none;">Home</a></li>
+                          <li><a href="/education" style="text-decoration:none;">Education</a></li>
+                          <li><a href="/types_of_ewaste" style="text-decoration:none;">Types of E-Waste</a></li>
+                          <li><a href="{{ url_for('login') }}" style="text-decoration:none;">Login</a></li>
+                          <li><a href="{{ url_for('signup') }}" style="text-decoration:none;">Sign Up</a></li>
+                      </ul>
+                  </div>
+              {% endif %}        
+              <!--/.nav-collapse -->
+          </div>
         </nav>
+      </header>
+      
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -77,6 +95,38 @@
 
         {% endblock %}
 
+        <div class="footer-dark">
+            <footer>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-md-3 item">
+                            <h3>Services</h3>
+                            <ul>
+                                <li><a href="/education">Education</a></li>
+                                <li><a target="_blank" href= "https://www.reddit.com/r/ALBA_Ewaste/">Forum</a></li>
+                                
+                            </ul>
+                        </div>
+                        <div class="col-sm-6 col-md-3 item">
+                            <h3>About</h3>
+                            <ul>
+                                <li><a target="_blank" href="https://alba-ewaste.sg/about-us/">About us</a></li>
+                                
+                            </ul>
+                        </div>
+                        <div class="col-md-6 item text">
+                            <h3>RecycleIT</h3>
+                            <p>RecycleIT is an AI solutions company based in Singapore. In collaboration with Alba-Ewaste, the features of this website aims to help make recycling easier and hassle free for everyone. </p>
+                        </div>
+                        <div class="col item social"><a target="_blank" href="https://www.facebook.com/ALBASingaporeSC/"><i class="icon ion-social-facebook"></i></a><a target="_blank" href="https://www.instagram.com/alba_singapore/?hl=en"><i class="icon ion-social-instagram"></i></a></div>
+                    </div>
+                    <p class="copyright">RecycleIT© 2022</p>
+                </div>
+            </footer>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+
         {% block scripts %}
         <script src="{{bootstrap_find_resource('jquery.js', cdn='jquery')}}"></script>
         <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>
@@ -84,3 +134,98 @@
 
     </body>
 </html>
+
+
+
+<style>
+    .footer-dark {
+        padding:50px 0;
+        color:#f0f9ff;
+        background-color:#282d32;
+      }
+      
+      .footer-dark h3 {
+        margin-top:0;
+        margin-bottom:12px;
+        font-weight:bold;
+        font-size:16px;
+      }
+      
+      .footer-dark ul {
+        padding:0;
+        list-style:none;
+        line-height:1.6;
+        font-size:14px;
+        margin-bottom:0;
+      }
+      
+      .footer-dark ul a {
+        color:inherit;
+        text-decoration:none;
+        opacity:0.6;
+      }
+      
+      .footer-dark ul a:hover {
+        opacity:0.8;
+      }
+      
+      @media (max-width:767px) {
+        .footer-dark .item:not(.social) {
+          text-align:center;
+          padding-bottom:20px;
+        }
+      }
+      
+      .footer-dark .item.text {
+        margin-bottom:36px;
+      }
+      
+      @media (max-width:767px) {
+        .footer-dark .item.text {
+          margin-bottom:0;
+        }
+      }
+      
+      .footer-dark .item.text p {
+        opacity:0.6;
+        margin-bottom:0;
+      }
+      
+      .footer-dark .item.social {
+        text-align:center;
+      }
+      
+      @media (max-width:991px) {
+        .footer-dark .item.social {
+          text-align:center;
+          margin-top:20px;
+        }
+      }
+      
+      .footer-dark .item.social > a {
+        font-size:20px;
+        width:36px;
+        height:36px;
+        line-height:36px;
+        display:inline-block;
+        text-align:center;
+        border-radius:50%;
+        box-shadow:0 0 0 1px rgba(255,255,255,0.4);
+        margin:0 8px;
+        color:#fff;
+        opacity:0.75;
+      }
+      
+      .footer-dark .item.social > a:hover {
+        opacity:0.9;
+      }
+      
+      .footer-dark .copyright {
+        text-align:center;
+        padding-top:24px;
+        opacity:0.3;
+        font-size:13px;
+        margin-bottom:0;
+      }
+      
+</style>
