@@ -38,11 +38,11 @@
               {% if user.is_authenticated %}
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                       <ul class="nav navbar-nav navbar-right">
-                          <li><a href="/dashboard">Dashboard</a></li>
-                          <li><a href="/education">Education</a></li>
-                          <li><a href="#">Settings</a></li>
-                          <li><a href="#">Profile</a></li>
-                          <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+                          <li><a href="/dashboard" style="text-decoration:none;">Dashboard</a></li>
+                          <li><a href="/education" style="text-decoration:none;">Education</a></li>
+                          <li><a href="#" style="text-decoration:none;">Settings</a></li>
+                          <li><a href="#" style="text-decoration:none;">Profile</a></li>
+                          <li><a href="{{ url_for('logout') }}" style="text-decoration:none;"></a>>Log Out</a></li>
                       </ul>
                       <form class="navbar-form navbar-right">
                           <input type="text" class="form-control" placeholder="Search...">
@@ -52,11 +52,11 @@
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                       <ul class="nav navbar-nav navbar-right">
                           <!-- <li class="active"><a href="/">Home</a></li> -->
-                          <li><a href="/">Home</a></li>
-                          <li><a href="/education">Education</a></li>
-                          <li><a href="/types_of_ewaste">Types of E-Waste</a></li>
-                          <li><a href="{{ url_for('login') }}">Login</a></li>
-                          <li><a href="{{ url_for('signup') }}">Sign Up</a></li>
+                          <li><a href="/" style="text-decoration:none;">Home</a></li>
+                          <li><a href="/education" style="text-decoration:none;">Education</a></li>
+                          <li><a href="/types_of_ewaste" style="text-decoration:none;">Types of E-Waste</a></li>
+                          <li><a href="{{ url_for('login') }}" style="text-decoration:none;">Login</a></li>
+                          <li><a href="{{ url_for('signup') }}" style="text-decoration:none;">Sign Up</a></li>
                       </ul>
                   </div>
               {% endif %}        
