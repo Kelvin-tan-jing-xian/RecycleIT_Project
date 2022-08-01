@@ -228,7 +228,7 @@ def api():
         img_normalized = img/255
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
-        model_trumen = load_model('trumen-saved-model-56-val_acc-0.909.hdf5')
+        model_trumen = load_model('trumen-saved-model-59-val_acc-0.909.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
         model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
