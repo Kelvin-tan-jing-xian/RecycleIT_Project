@@ -140,6 +140,10 @@ def dashboard():
 def education():
     return render_template('education.html', user=current_user)
 
+@app.route('/types_of_ewaste')
+def types_of_ewaste():
+    return render_template('types_of_ewaste.html', user=current_user)
+
 
 @app.route("/viewAllUsers")
 @login_required

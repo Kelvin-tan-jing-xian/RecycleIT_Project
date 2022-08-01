@@ -358,3 +358,82 @@ h1 {
 .service-item .down-content p {
 	margin-bottom: 20px;
 }
+
+/* for types of ewaste */
+.page-heading {
+	text-align: center;
+	background-image: linear-gradient(rgba(0, 0, 0, 0.541),rgba(0, 0, 0, 0.623)), url(../images/ewaste_03.jpeg);
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 230px 0px 150px 0px;
+	color: #fff;
+}
+
+.page-heading h1 {
+	text-transform: capitalize;
+	font-size: 36px;
+	font-weight: 700;
+	letter-spacing: 2px;
+	margin-bottom: 18px;
+}
+
+.page-heading span {
+	font-size: 15px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: #fff;
+	display: block;
+}
+
+/* More Info */
+
+.more-info {
+	margin-top: 140px;
+}
+
+.more-info .left-image img {
+	width: 100%;
+	overflow: hidden;
+}
+
+.more-info .more-info-content {
+	background-color: #f7f7f7;
+}
+
+.about-info .more-info-content {
+	background-color: transparent;
+}
+
+.about-info .right-content {
+	padding: 0px!important;
+	margin-right: 30px;
+}
+
+.more-info .right-content {
+	padding: 45px 45px 45px 30px;
+}
+
+.more-info .right-content span {
+	text-transform: uppercase;
+	font-size: 15px;
+	color: #666;
+	letter-spacing: 1px;
+	margin-bottom: 10px;
+	display: block;
+}
+
+.more-info .right-content h2 {
+	font-size: 36px;
+	font-weight: 600;
+	margin-bottom: 35px;
+}
+
+.more-info .right-content em {
+	font-style: normal;
+	color: #a4c639;
+}
+
+.more-info .right-content p {
+	margin-bottom: 30px;
+}
