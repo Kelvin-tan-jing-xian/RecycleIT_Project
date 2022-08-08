@@ -6,13 +6,14 @@ from flask_wtf import FlaskForm
 from tensorflow import keras
 import matplotlib.pyplot as plt
 from wtforms import StringField, PasswordField, BooleanField, RadioField
-from wtforms.validators import InputRequired, Email, Length
+from wtforms.validators import InputRequired, Email, Length, Optional
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
 from werkzeug.utils import secure_filename
 import os
+from sqlalchemy.sql import func
 import urllib.request
 from keras.models import load_model
 import numpy as np
@@ -71,14 +72,17 @@ class User(UserMixin, db.Model):
 
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    time_created = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
     items = db.Column(db.String)
-    username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(15))
+    email = db.Column(db.String(50))
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
 
-    def __init__(self, items, username, email, password, role, street_address, unit_number, block_number):
+    def __init__(self, items, username, email, street_address, unit_number, block_number):
         self.items = items
         self.username = username
         self.email = email
@@ -118,27 +122,36 @@ class RegisterForm(FlaskForm):
 
 
 class RequestForm(FlaskForm):
-    lamp = BooleanField(label='Lamp')
-    router = BooleanField(label='Router')
-    battery = BooleanField(label='Household Batteries')
-    modem = BooleanField(label='Modem')
-    network_switch = BooleanField(label='Network Switch')
-    laptop = BooleanField(label='Laptop')
-    tablet = BooleanField(label='Tablet')
-    smartphone = BooleanField(label='Mobile Phone')
-    fluorescent_tube = BooleanField(label='Consumer Lamp (fluorescent tube)')
-    bulb = BooleanField(label='Consumer Lamp (bulb)')
-    dryer = BooleanField(label='Dryer')
-    washing_machine = BooleanField(label='Washing Machine')
+    lamp = BooleanField(label='Lamp', validators=[Optional()])
+    router = BooleanField(label='Router', validators=[Optional()])
+    battery = BooleanField(label='Household Batteries',
+                           validators=[Optional()])
+    modem = BooleanField(label='Modem', validators=[Optional()])
+    network_switch = BooleanField(
+        label='Network Switch', validators=[Optional()])
+    laptop = BooleanField(label='Laptop', validators=[Optional()])
+    tablet = BooleanField(label='Tablet', validators=[Optional()])
+    smartphone = BooleanField(label='Mobile Phone', validators=[Optional()])
+    fluorescent_tube = BooleanField(
+        label='Consumer Lamp (fluorescent tube)', validators=[Optional()])
+    bulb = BooleanField(label='Consumer Lamp (bulb)', validators=[Optional()])
+    dryer = BooleanField(label='Dryer', validators=[Optional()])
+    washing_machine = BooleanField(
+        label='Washing Machine', validators=[Optional()])
     electric_vehicle_battery = BooleanField(
-        label='Consumer Electric Vehicle Battery')
-    pmd = BooleanField(label='Personal Mobility Device')
-    electric_mobility_device = BooleanField(label='Electric Mobility Device')
-    aircon = BooleanField(label='Air-conditioner')
-    refrigerator = BooleanField(label='Consumer Refrigerator(=<900L)')
-    television = BooleanField(label='Television')
-    printer = BooleanField(label='Printer (less than 20kg)')
-    power_assisted_bicycle = BooleanField(label='Power Assisted Bicycle (PAB)')
+        label='Consumer Electric Vehicle Battery', validators=[Optional()])
+    pmd = BooleanField(label='Personal Mobility Device',
+                       validators=[Optional()])
+    electric_mobility_device = BooleanField(
+        label='Electric Mobility Device', validators=[Optional()])
+    aircon = BooleanField(label='Air-conditioner', validators=[Optional()])
+    refrigerator = BooleanField(
+        label='Consumer Refrigerator(=<900L)', validators=[Optional()])
+    television = BooleanField(label='Television', validators=[Optional()])
+    printer = BooleanField(
+        label='Printer (less than 20kg)', validators=[Optional()])
+    power_assisted_bicycle = BooleanField(
+        label='Power Assisted Bicycle (PAB)', validators=[Optional()])
 
 
 @app.route('/')
@@ -159,7 +172,7 @@ def login():
                 if user.role == "admin":
                     return redirect(url_for('dashboard'))
                 else:
-                    return redirect(url_for('consumerHome'))
+                    return redirect(url_for('createRequest'))
             else:
                 flash("Incorrect Username or password")
 
@@ -195,16 +208,30 @@ def signup():
     return render_template('signup.html', form=form, user=current_user)
 
 
-@app.route('/createRequest', methods=['POST'])
+@app.route('/createRequest', methods=['GET', 'POST'])
+@login_required
 def createRequest():
     form = RequestForm()
 
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(
-            form.password.data, method='sha256')
+    if request.method == "POST":
         user = User.query.filter_by(email=current_user.email).first()
-
-        new_request = Request(username=user.username,
+        items = ""
+        if form.network_switch.data is True:
+            items = "network switch"
+        if form.aircon.data is True:
+            items = items + ", aircon"
+        if form.battery.data is True:
+            items = items + ", battery"
+        if form.dryer.data is True:
+            items = items + ", dryer"
+        if form.bulb.data is True:
+            items = items + ", bulb"
+        if form.electric_mobility_device.data is True:
+            items = items + ", electric mobility device"
+        if form.electric_vehicle_battery.data is True:
+            items = items + ", electric vehicle battery"
+        new_request = Request(items=items,
+                              username=user.username,
                               email=user.email,
                               street_address=user.street_address,
                               unit_number=user.unit_number,
@@ -213,19 +240,19 @@ def createRequest():
         db.session.commit()
         return redirect("/retrieveRequest")
 
-    return render_template('consumerHome.html', user=current_user)
+    return render_template('createRequest.html', form=form, user=current_user)
+
+
+@app.route("/retrieveRequest")
+@login_required
+def retrieveRequest():
+    return render_template("retrieveRequest.html", user=current_user, values=Request.query.all())
 
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
-
-
-@app.route('/consumerHome')
-@login_required
-def consumerHome():
-    return render_template('consumerHome.html', name=current_user.username, user=current_user)
 
 
 @app.route('/education')
@@ -242,6 +269,12 @@ def types_of_ewaste():
 @login_required
 def viewAllUsers():
     return render_template("viewAllUsers.html", user=current_user, values=User.query.all())
+
+
+@app.route("/manageRequests")
+@login_required
+def manageRequests():
+    return render_template("manageRequests.html", user=current_user, values=Request.query.all())
 
 
 @app.route('/user/update', methods=['GET', 'POST'])
