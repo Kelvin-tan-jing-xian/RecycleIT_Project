@@ -1,12 +1,11 @@
 import email
-
 import tensorflow
 from flask import Flask, render_template, redirect, request, session, url_for, flash, jsonify, json, abort
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from tensorflow import keras
 import matplotlib.pyplot as plt
-from wtforms import StringField, PasswordField, BooleanField
+from wtforms import StringField, PasswordField, BooleanField, RadioField
 from wtforms.validators import InputRequired, Email, Length
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -54,12 +53,38 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(15), unique=True)
     email = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
+    role = db.Column(db.String(80))
+    street_address = db.Column(db.String(100))
+    unit_number = db.Column(db.String)
+    block_number = db.Column(db.String)
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, email, password, role, street_address, unit_number, block_number):
 
         self.username = username
         self.email = email
         self.password = password
+        self.role = role
+        self.street_address = street_address
+        self.unit_number = unit_number
+        self.block_number = block_number
+
+
+class Request(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    items = db.Column(db.String)
+    username = db.Column(db.String(15), unique=True)
+    email = db.Column(db.String(50), unique=True)
+    street_address = db.Column(db.String(100))
+    unit_number = db.Column(db.String)
+    block_number = db.Column(db.String)
+
+    def __init__(self, items, username, email, password, role, street_address, unit_number, block_number):
+        self.items = items
+        self.username = username
+        self.email = email
+        self.street_address = street_address
+        self.unit_number = unit_number
+        self.block_number = block_number
 
 
 @login_manager.user_loader
@@ -76,12 +101,44 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    email = StringField('email', validators=[InputRequired(), Email(
+    email = StringField(label='Email', validators=[InputRequired(), Email(
         message='Invalid email'), Length(max=50)])
-    username = StringField('username', validators=[
+    username = StringField(label='Username', validators=[
                            InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('password', validators=[
+    password = PasswordField(label='Password', validators=[
                              InputRequired(), Length(min=8, max=80)])
+    role = RadioField(label='Role',  choices=[
+                      ('consumer', 'Sign up as consumer'), ('admin', 'Sign up as admin')], default='consumer')
+    street_address = StringField(label='Street Address', validators=[
+                                 InputRequired()], default='Ang Mo Kio Avenue 1')
+    unit_number = StringField(label='Unit Number', validators=[
+                              InputRequired()], default='#07-06')
+    block_number = StringField(label='Block Number', validators=[
+                               InputRequired()], default='896A')
+
+
+class RequestForm(FlaskForm):
+    lamp = BooleanField(label='Lamp')
+    router = BooleanField(label='Router')
+    battery = BooleanField(label='Household Batteries')
+    modem = BooleanField(label='Modem')
+    network_switch = BooleanField(label='Network Switch')
+    laptop = BooleanField(label='Laptop')
+    tablet = BooleanField(label='Tablet')
+    smartphone = BooleanField(label='Mobile Phone')
+    fluorescent_tube = BooleanField(label='Consumer Lamp (fluorescent tube)')
+    bulb = BooleanField(label='Consumer Lamp (bulb)')
+    dryer = BooleanField(label='Dryer')
+    washing_machine = BooleanField(label='Washing Machine')
+    electric_vehicle_battery = BooleanField(
+        label='Consumer Electric Vehicle Battery')
+    pmd = BooleanField(label='Personal Mobility Device')
+    electric_mobility_device = BooleanField(label='Electric Mobility Device')
+    aircon = BooleanField(label='Air-conditioner')
+    refrigerator = BooleanField(label='Consumer Refrigerator(=<900L)')
+    television = BooleanField(label='Television')
+    printer = BooleanField(label='Printer (less than 20kg)')
+    power_assisted_bicycle = BooleanField(label='Power Assisted Bicycle (PAB)')
 
 
 @app.route('/')
@@ -95,10 +152,14 @@ def login():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
+
         if user:
             if check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
-                return redirect(url_for('dashboard'))
+                if user.role == "admin":
+                    return redirect(url_for('dashboard'))
+                else:
+                    return redirect(url_for('consumerHome'))
             else:
                 flash("Incorrect Username or password")
 
@@ -120,14 +181,39 @@ def signup():
         hashed_password = generate_password_hash(
             form.password.data, method='sha256')
         new_user = User(username=form.username.data,
-                        email=form.email.data, password=hashed_password)
+                        email=form.email.data,
+                        password=hashed_password,
+                        role=form.role.data,
+                        street_address=form.street_address.data,
+                        unit_number=form.unit_number.data,
+                        block_number=form.block_number.data)
         db.session.add(new_user)
         db.session.commit()
         session["user_created"] = new_user.email
         return redirect("/login")
-        # return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form, user=current_user)
+
+
+@app.route('/createRequest', methods=['POST'])
+def createRequest():
+    form = RequestForm()
+
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(
+            form.password.data, method='sha256')
+        user = User.query.filter_by(email=current_user.email).first()
+
+        new_request = Request(username=user.username,
+                              email=user.email,
+                              street_address=user.street_address,
+                              unit_number=user.unit_number,
+                              block_number=user.block_number)
+        db.session.add(new_request)
+        db.session.commit()
+        return redirect("/retrieveRequest")
+
+    return render_template('consumerHome.html', user=current_user)
 
 
 @app.route('/dashboard')
@@ -136,9 +222,16 @@ def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
 
 
+@app.route('/consumerHome')
+@login_required
+def consumerHome():
+    return render_template('consumerHome.html', name=current_user.username, user=current_user)
+
+
 @app.route('/education')
 def education():
     return render_template('education.html', user=current_user)
+
 
 @app.route('/types_of_ewaste')
 def types_of_ewaste():
@@ -204,7 +297,7 @@ def api():
     Lamps_subcategory = ["lamp"]
     img_height = 180
     img_width = 180
-    threshold = 0.52
+    threshold = 0.74
     showRegulated = False
     showNon = False
     if 'file' not in request.files:
@@ -229,7 +322,8 @@ def api():
         print("loading my model")
         model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
-        model_geoffrey = load_model('geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_geoffrey = load_model(
+            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
         model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
         print("model loaded successfully")
 

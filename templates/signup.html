@@ -20,6 +20,14 @@ Sign Up
     {{ wtf.form_field(form.username) }}
     {{ wtf.form_field(form.email) }}
     {{ wtf.form_field(form.password) }}
+    <label for="role">Role</label>
+    {{ wtf.form_field(form.role) }}
+    {{ wtf.form_field(form.street_address) }}
+    {{ wtf.form_field(form.unit_number) }}
+    {{ wtf.form_field(form.block_number) }}
+
+
+
     <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
   </form>
 
