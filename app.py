@@ -58,6 +58,7 @@ class User(UserMixin, db.Model):
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
+    requests = db.relationship('Request', backref='user')
 
     def __init__(self, username, email, password, role, street_address, unit_number, block_number):
 
@@ -81,14 +82,16 @@ class Request(db.Model):
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, items, username, email, street_address, unit_number, block_number):
+    def __init__(self, items, username, email, street_address, unit_number, block_number, user_id):
         self.items = items
         self.username = username
         self.email = email
         self.street_address = street_address
         self.unit_number = unit_number
         self.block_number = block_number
+        self.user_id = user_id
 
 
 @login_manager.user_loader
@@ -122,7 +125,7 @@ class RegisterForm(FlaskForm):
 
 
 class RequestForm(FlaskForm):
-    lamp = BooleanField(label='Lamp', validators=[Optional()])
+    lamp = BooleanField(label='Household Lamp', validators=[Optional()])
     router = BooleanField(label='Router', validators=[Optional()])
     battery = BooleanField(label='Household Batteries',
                            validators=[Optional()])
@@ -199,7 +202,8 @@ def signup():
                         role=form.role.data,
                         street_address=form.street_address.data,
                         unit_number=form.unit_number.data,
-                        block_number=form.block_number.data)
+                        block_number=form.block_number.data,
+                        )
         db.session.add(new_user)
         db.session.commit()
         session["user_created"] = new_user.email
@@ -230,12 +234,40 @@ def createRequest():
             items = items + ", electric mobility device"
         if form.electric_vehicle_battery.data is True:
             items = items + ", electric vehicle battery"
+        if form.fluorescent_tube.data is True:
+            items += ", fluorescent tube"
+        if form.laptop.data is True:
+            items += ", laptop"
+        if form.lamp.data is True:
+            items += ", household lamp"
+        if form.modem.data is True:
+            items += ", modem"
+        if form.pmd.data is True:
+            items += ", pmd"
+        if form.power_assisted_bicycle.data is True:
+            items += ", power assisted bicycle"
+        if form.printer.data is True:
+            items += ", printer"
+        if form.refrigerator.data is True:
+            items += ", refrigerator"
+        if form.router.data is True:
+            items += ", router"
+        if form.smartphone.data is True:
+            items += ", smartphone"
+        if form.tablet.data is True:
+            items += ", tablet"
+        if form.television.data is True:
+            items += ", television"
+        if form.washing_machine.data is True:
+            items += ", washing machine"
+
         new_request = Request(items=items,
                               username=user.username,
                               email=user.email,
                               street_address=user.street_address,
                               unit_number=user.unit_number,
-                              block_number=user.block_number)
+                              block_number=user.block_number,
+                              user_id=user.id)
         db.session.add(new_request)
         db.session.commit()
         return redirect("/retrieveRequest")
@@ -246,7 +278,38 @@ def createRequest():
 @app.route("/retrieveRequest")
 @login_required
 def retrieveRequest():
-    return render_template("retrieveRequest.html", user=current_user, values=Request.query.all())
+    user = User.query.filter_by(email=current_user.email).first()
+
+    return render_template("retrieveRequest.html", user=current_user, values=user.requests)
+
+
+@app.route("/request/detail/<id>", methods=['POST'])
+@login_required
+def requestDetail(id):
+    smallItems = False
+    bigItems = False
+    my_data = Request.query.get(id)
+    print("items = ", my_data.items)
+    if my_data.items.__contains__("battery") and my_data.items.__contains__("smartphone") and my_data.items.__contains__("bulb"):
+        smallItems = True
+    if my_data.items.__contains__("television"):
+        bigItems = True
+
+    return render_template("requestDetail.html", bigItems=bigItems, smallItems=smallItems, user=current_user, items=my_data.items)
+
+
+@app.route('/request/update', methods=['GET', 'POST'])
+def updateRequest():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('retrieveRequest'))
 
 
 @app.route('/dashboard')
@@ -271,6 +334,27 @@ def viewAllUsers():
     return render_template("viewAllUsers.html", user=current_user, values=User.query.all())
 
 
+@app.route('/userProfile', methods=['GET', 'POST'])
+@login_required
+def consumerUpdateUser():
+
+    if request.method == 'POST':
+        my_data = User.query.get(request.form.get('id'))
+
+        my_data.username = request.form['username']
+        my_data.street_address = request.form['street_address']
+        my_data.unit_number = request.form['unit_number']
+        my_data.block_number = request.form['block_number']
+
+        db.session.commit()
+        flash("Profile Updated Successfully")
+
+        # values=
+        return render_template("userProfile.html", user=current_user,)
+
+    return render_template("userProfile.html", user=current_user,)  # values=
+
+
 @app.route("/manageRequests")
 @login_required
 def manageRequests():
@@ -292,8 +376,6 @@ def update():
 
         return redirect(url_for('viewAllUsers'))
 
-# This route is for deleting our user
-
 
 @app.route('/user/delete/<id>/', methods=['POST'])
 def delete(id):
@@ -303,6 +385,26 @@ def delete(id):
     flash("User Deleted Successfully")
 
     return redirect(url_for('viewAllUsers'))
+
+
+@app.route('/request/delete/<id>/', methods=['POST'])
+def deleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('retrieveRequest'))
+
+
+@app.route('/admin/request/delete/<id>/', methods=['POST'])
+def adminDeleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('manageRequests'))
 
 
 @app.route('/logout')

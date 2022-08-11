@@ -1,0 +1,37 @@
+
+{% extends "base.html" %}
+{% block title %}
+Retrieve Request
+{% endblock %}
+
+
+
+{% block content %}
+<br>
+<br>
+<br>
+<h1>Request Details</h1>
+{% if smallItems %}
+<div class="card-requestdetail">
+    <h2>Small Items</h2>
+
+    <img src="/static/images/plasticBag.jpg"  style="width:150px; height: 150px;">
+    <img src="/static/images/bulbBox.jpg" style="width:150px; height: 150px;">
+
+    <p class="price-requestdetail">{{items}}</p>
+    <p>Please place all these small items in a plastic bag for ease of collection. For fragile item like bulbs, please store them into their original packaging or other safe containers. </p>
+    <p><a href="/retrieveRequest">Back</a></p>
+</div>
+{% endif %}
+{% if bigItems%}
+<br>
+<div class="card-requestdetail">
+    <h2>Large Items</h2>
+
+    <img src="/static/images/televisionBox.jpg" alt="Denim Jeans" style="width:100%; height: 100%;">
+    <p class="price-requestdetail">{{items}}</p>
+    <p>Let's make the collection job easier for the ALBA staff by wrapping up your large items with their original packaging</p>
+    <p><a href="/retrieveRequest">Back</a></p>
+</div>
+{% endif %}
+{% endblock %}

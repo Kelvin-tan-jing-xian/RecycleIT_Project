@@ -28,6 +28,8 @@ Retrieve Request
         <thead>
             <tr>
                 <th scope="col">Id</th>
+                <th scope="col">User Id</th>
+
                 <th scope="col">Time Created</th>
                 <th scope="col">Time Updated</th>
 
@@ -46,6 +48,8 @@ Retrieve Request
             {% for item in values %}
             <tr>
                 <th scope="row">{{item.id}}</th>
+                <td>{{item.user_id}}</td>
+
                 <td>{{item.time_created}}</td>
                 <td>{{item.time_updated}}</td>
 
@@ -58,13 +62,13 @@ Retrieve Request
 
 
 
-                <td><a href="/user/update/{{item.id}}" class="btn btn-warning" data-toggle="modal"
+                <td><a href="" class="btn btn-warning" data-toggle="modal"
                         data-target="#modaledit{{item.id}}">Edit</a>
                 </td>
                 <!--    Delete button-->
                 <td>
                     <!--Points to delete_enquiry() function in __init__.py    id is needed so that you can delete the particular record with the id-->
-                    <form action="/user/delete/{{item.id}}/" method="POST">
+                    <form action="/admin/request/delete/{{item.id}}/" method="POST">
 
                         <!-- Delete Button that opens the modal once clicked -->
                         <button type="button" class="btn btn-danger" data-toggle="modal"
@@ -85,7 +89,7 @@ Retrieve Request
 
                                     <!-- Modal body -->
                                     <div class="modal-body">
-                                        Are you sure you want to delete {{item.email}}?
+                                        Are you sure you want to delete the request of {{item.items}}?
                                     </div>
 
                                     <!-- Modal footer -->
