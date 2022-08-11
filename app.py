@@ -1,4 +1,5 @@
 import email
+from re import sub
 import tensorflow
 from flask import Flask, render_template, redirect, request, session, url_for, flash, jsonify, json, abort
 from flask_bootstrap import Bootstrap
@@ -12,6 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
 from werkzeug.utils import secure_filename
+from random import randint
 import os
 from sqlalchemy.sql import func
 import urllib.request
@@ -24,7 +26,9 @@ from PIL import Image
 from keras.applications import imagenet_utils
 from keras.applications.resnet import decode_predictions
 import cv2
-
+from email.message import EmailMessage
+import ssl
+import smtplib
 
 app = Flask(__name__)
 app.secret_key = "kelvin-tan"
@@ -48,6 +52,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# database
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -90,6 +95,20 @@ class Request(db.Model):
         self.unit_number = unit_number
         self.block_number = block_number
 
+
+class PIN(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    pin = db.Column(db.String)
+    username = db.Column(db.String(15))
+    email = db.Column(db.String(50))
+
+    def __init__(self, pin, username, email):
+        self.pin = pin
+        self.username = username
+        self.email = email
+
+# forms
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -153,6 +172,10 @@ class RequestForm(FlaskForm):
     power_assisted_bicycle = BooleanField(
         label='Power Assisted Bicycle (PAB)', validators=[Optional()])
 
+class PINForm(FlaskForm):
+    email = StringField('email', validators=[InputRequired(), Length(min=4, max=50)])
+
+# route
 
 @app.route('/')
 def index():
@@ -242,6 +265,90 @@ def createRequest():
 
     return render_template('createRequest.html', form=form, user=current_user)
 
+@app.route("/getPIN",  methods=['GET', 'POST'])
+def getPIN():
+    form = PINForm()
+    # generate pin
+    generated_num = np.random.randint(9,size=(4))
+    pin = ""
+    for i in generated_num:
+        pin += str(i)
+    print("the pin is: ", pin )
+
+    if current_user.is_authenticated:
+        user = User.query.filter_by(email=current_user.email).first()
+        has_pin = PIN.query.filter_by(email=current_user.email).first()
+        if has_pin == None:
+            new_pin = PIN(pin=pin, username=user.username, email=user.email)
+            db.session.add(new_pin)
+            db.session.commit()
+
+            # send pin to email 
+            email_sender = "wongchekhei.11810@gmail.com"
+            email_password = "fwylltranfgssyxi"
+            email_receiver = str(form.email.data)
+
+            subject = "Your PIN to recycle the E-waste"
+            body = """
+            Your PIN is:
+            """ + pin
+
+            em = EmailMessage()
+            em["From"] = email_sender
+            em["To"] = email_receiver
+            em["Subject"] = subject
+            em.set_content(body)
+
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+            get_pin=PIN.query.filter_by(email=current_user.email).first()
+            return render_template('getPIN.html', user=current_user, get_pin=get_pin)
+        else:
+            hasPIN = True
+            print("you have a pin already!")
+
+    else:
+        hasPIN = False
+        if request.method == "POST": # for user not logged in
+    
+            has_pin = PIN.query.filter_by(email=form.email.data).first()
+            print("this is has pin", has_pin)
+            if has_pin == None:
+                new_pin = PIN(pin=pin, username="not registered", email=form.email.data)
+                db.session.add(new_pin)
+                db.session.commit()
+
+                # send pin to email 
+                email_sender = "wongchekhei.11810@gmail.com"
+                email_password = "fwylltranfgssyxi"
+                email_receiver = str(form.email.data)
+
+                subject = "Your PIN to recycle the E-waste"
+                body = """
+                Your PIN is:
+                """ + pin
+
+                em = EmailMessage()
+                em["From"] = email_sender
+                em["To"] = email_receiver
+                em["Subject"] = subject
+                em.set_content(body)
+
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+                get_pin=PIN.query.filter_by(email=form.email.data).first()
+                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin)
+
+            else:
+                hasPIN = True
+                print("you have a PIN already!")
+    
+    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], hasPIN=hasPIN)
+        
 
 @app.route("/retrieveRequest")
 @login_required
@@ -311,6 +418,7 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+# our models
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -357,7 +465,7 @@ def api():
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
-        model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
+        model_khei = load_model('khei-saved-model-57-val_acc-0.817.hdf5')
         print("model loaded successfully")
 
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))

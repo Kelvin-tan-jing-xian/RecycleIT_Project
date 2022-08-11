@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Get PIN
+{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    {% if hasPIN %}
+        <p>you have a pin already! </p>
+    {% else %}
+        <p>{{ get_pin.email }}</p>
+        <p>{{ get_pin.time_created }}</p>
+        <p>the pin is: {{ get_pin.pin }}</p>
+        <p>{{ get_pin.username }}</p>
+    {% endif %}
+
+{% else %}
+    {% if hasPIN %}
+        <p>you have a pin already! </p>
+    {% else %}
+        <p>the pin is: {{ get_pin.pin }}</p>
+        <form method="POST">
+            <div class="form-group">
+            {{ wtf.form_field(form.email) }}
+            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
