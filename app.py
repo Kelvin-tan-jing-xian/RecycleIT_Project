@@ -190,8 +190,27 @@ class PINForm(FlaskForm):
 
 @app.route('/')
 def index():
-    return render_template('index.html', user=current_user)
+    item_dict = {}
+    if "AddedItems" in session: # checking if any session existed
+        print("AddedItems session found")
+        item_dict = session["AddedItems"]
 
+    return render_template('index.html', user=current_user, item_dict=item_dict)
+
+@app.route('/removeItem/<filename>')
+def removeItem(filename):
+    item_dict = {}
+    if "AddedItems" in session: # checking if any session existed
+        print("removing item", filename)
+        item_dict = session["AddedItems"]
+
+    item_dict.pop(filename)
+    session["AddedItems"] = item_dict
+
+    for i in item_dict:
+        print(i, item_dict[i])
+    
+    return render_template('index.html', user=current_user, item_dict=item_dict)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -344,7 +363,7 @@ def sendPINEmail(pin, email):
 @app.route("/getPIN",  methods=['GET', 'POST'])
 def getPIN():
     form = PINForm()
-    
+
      # generate pin and check if exists in db
     while True:
         generated_num = np.random.randint(9,size=(4))
@@ -581,7 +600,8 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('kelvin-saved-model-31-val_acc-0.848.hdf5')
+        # do not have this model yet: 'kelvin-saved-model-31-val_acc-0.848.hdf5'
+        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
@@ -634,13 +654,24 @@ def api():
         # resp.status_code = 201
         # return resp
 
+        # storing items into session
+        item_dict = {}
+        if "AddedItems" in session: # checking if any session existed
+            print("AddedItems session found")
+            item_dict = session["AddedItems"]
+        else:
+            print("create new AddedItems session")
+        item_dict.update({filename: item})
+        session["AddedItems"] = item_dict
+
         return render_template('index.html',
                                filename=filename,
                                user=current_user,
                                item=item,
                                showRegulated=showRegulated,
                                showNon=showNon,
-                               subcategory=subcategory
+                               subcategory=subcategory,
+                               item_dict=item_dict
                                )
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif', category='error')
