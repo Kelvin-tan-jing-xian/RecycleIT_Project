@@ -56,6 +56,7 @@ login_manager.login_view = 'login'
 
 # database
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
@@ -65,6 +66,7 @@ class User(UserMixin, db.Model):
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
+    requests = db.relationship('Request', backref='user')
 
     def __init__(self, username, email, password, role, street_address, unit_number, block_number):
 
@@ -88,19 +90,22 @@ class Request(db.Model):
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, items, username, email, street_address, unit_number, block_number):
+    def __init__(self, items, username, email, street_address, unit_number, block_number, user_id):
         self.items = items
         self.username = username
         self.email = email
         self.street_address = street_address
         self.unit_number = unit_number
         self.block_number = block_number
+        self.user_id = user_id
 
 
 class PIN(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_created = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
     pin = db.Column(db.String)
     username = db.Column(db.String(15))
     email = db.Column(db.String(50))
@@ -111,6 +116,7 @@ class PIN(db.Model):
         self.email = email
 
 # forms
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -139,11 +145,11 @@ class RegisterForm(FlaskForm):
     unit_number = StringField(label='Unit Number', validators=[
                               InputRequired()], default='#07-06')
     block_number = StringField(label='Block Number', validators=[
-                               InputRequired()], default='896A')
+                               InputRequired()], default='205')
 
 
 class RequestForm(FlaskForm):
-    lamp = BooleanField(label='Lamp', validators=[Optional()])
+    lamp = BooleanField(label='Household Lamp', validators=[Optional()])
     router = BooleanField(label='Router', validators=[Optional()])
     battery = BooleanField(label='Household Batteries',
                            validators=[Optional()])
@@ -174,10 +180,13 @@ class RequestForm(FlaskForm):
     power_assisted_bicycle = BooleanField(
         label='Power Assisted Bicycle (PAB)', validators=[Optional()])
 
+
 class PINForm(FlaskForm):
-    email = StringField('email', validators=[InputRequired(), Length(min=4, max=50)])
+    email = StringField('email', validators=[
+                        InputRequired(), Length(min=4, max=50)])
 
 # route
+
 
 @app.route('/')
 def index():
@@ -224,7 +233,7 @@ def signup():
                         role=form.role.data,
                         street_address=form.street_address.data,
                         unit_number=form.unit_number.data,
-                        block_number=form.block_number.data)
+                        block_number=form.block_number.data,)
         db.session.add(new_user)
         db.session.commit()
         session["user_created"] = new_user.email
@@ -255,67 +264,56 @@ def createRequest():
             items = items + ", electric mobility device"
         if form.electric_vehicle_battery.data is True:
             items = items + ", electric vehicle battery"
+
+        if form.fluorescent_tube.data is True:
+            items += ", fluorescent tube"
+        if form.laptop.data is True:
+            items += ", laptop"
+        if form.lamp.data is True:
+            items += ", household lamp"
+        if form.modem.data is True:
+            items += ", modem"
+        if form.pmd.data is True:
+            items += ", pmd"
+        if form.power_assisted_bicycle.data is True:
+            items += ", power assisted bicycle"
+        if form.printer.data is True:
+            items += ", printer"
+        if form.refrigerator.data is True:
+            items += ", refrigerator"
+        if form.router.data is True:
+            items += ", router"
+        if form.smartphone.data is True:
+            items += ", smartphone"
+        if form.tablet.data is True:
+            items += ", tablet"
+        if form.television.data is True:
+            items += ", television"
+        if form.washing_machine.data is True:
+            items += ", washing machine"
         new_request = Request(items=items,
                               username=user.username,
                               email=user.email,
                               street_address=user.street_address,
                               unit_number=user.unit_number,
-                              block_number=user.block_number)
+                              block_number=user.block_number,
+                              user_id=user.id)
         db.session.add(new_request)
         db.session.commit()
         return redirect("/retrieveRequest")
 
     return render_template('createRequest.html', form=form, user=current_user)
 
-def sendPINEmail(pin, email): # will update this
-    email_sender = ""
-    email_password = ""
-    email_receiver = email
-
-    subject = "Your PIN to recycle the E-waste"
-
-    #HTML Message Part
-    html = """\
-    <html>
-    <body style="font-family: 'Poppins', sans-serif;" >
-        <p>Dear customer,</p>
-        <p>THANK YOU FOR RECYCLING!</p>
-        <br>
-        <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
-        <p>Do use this only for the E-Wastes that you have scanned previously.</p>
-        <p>Thanks,</p>
-        <h2 style="color: #a4c639;">RECYCLEIT</h2>
-    </body>
-    </html>
-    """.format(pin)
-
-    part = MIMEText(html, "html")
-                
-    em = MIMEMultipart("alternative")
-    em["From"] = email_sender
-    em["To"] = email_receiver
-    em["Subject"] = subject
-    em.attach(part)
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
-        smtp.login(email_sender, email_password)
-        smtp.sendmail(email_sender, email_receiver, em.as_string())
-        
-    return
 
 @app.route("/getPIN",  methods=['GET', 'POST'])
 def getPIN():
     form = PINForm()
-
-    # generate pin and check if exists in db
-    while True:
-        generated_num = np.random.randint(9,size=(4))
-        pin = ""
-        for i in generated_num:
-            pin += str(i)
-        pinExists = PIN.query.filter_by(pin=pin).first()
-        if pinExists == None:
-            break
+    # generate pin
+    generated_num = np.random.randint(9, size=(4))
+    pin = ""
+    for i in generated_num:
+        pin += str(i)
+    print("the pin is: ", pin)
 
     if current_user.is_authenticated:
         user = User.query.filter_by(email=current_user.email).first()
@@ -325,10 +323,27 @@ def getPIN():
             db.session.add(new_pin)
             db.session.commit()
 
-            # send pin to email 
-            sendPINEmail(pin, str(user.email))
+            # send pin to email
+            email_sender = "wongchekhei.11810@gmail.com"
+            email_password = "fwylltranfgssyxi"
+            email_receiver = str(form.email.data)
 
-            get_pin=PIN.query.filter_by(email=current_user.email).first()
+            subject = "Your PIN to recycle the E-waste"
+            body = """
+            Your PIN is:
+            """ + pin
+
+            em = EmailMessage()
+            em["From"] = email_sender
+            em["To"] = email_receiver
+            em["Subject"] = subject
+            em.set_content(body)
+
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+                smtp.login(email_sender, email_password)
+                smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+            get_pin = PIN.query.filter_by(email=current_user.email).first()
             return render_template('getPIN.html', user=current_user, get_pin=get_pin)
         else:
             hasPIN = True
@@ -336,32 +351,81 @@ def getPIN():
 
     else:
         hasPIN = False
-        if request.method == "POST": # for user not logged in
-    
+        if request.method == "POST":  # for user not logged in
+
             has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
-                new_pin = PIN(pin=pin, username="NotRegisteredUser", email=form.email.data)
+                new_pin = PIN(pin=pin, username="not registered",
+                              email=form.email.data)
                 db.session.add(new_pin)
                 db.session.commit()
 
-                # send pin to email 
-                sendPINEmail(pin, str(form.email.data))
+                # send pin to email
+                email_sender = "wongchekhei.11810@gmail.com"
+                email_password = "fwylltranfgssyxi"
+                email_receiver = str(form.email.data)
 
-                get_pin=PIN.query.filter_by(email=form.email.data).first()
+                subject = "Your PIN to recycle the E-waste"
+                body = """
+                Your PIN is:
+                """ + pin
+
+                em = EmailMessage()
+                em["From"] = email_sender
+                em["To"] = email_receiver
+                em["Subject"] = subject
+                em.set_content(body)
+
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+                get_pin = PIN.query.filter_by(email=form.email.data).first()
                 return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin)
 
             else:
                 hasPIN = True
                 print("you have a PIN already!")
-    
+
     return render_template('getPIN.html', form=form, user=current_user, get_pin=[], hasPIN=hasPIN)
-        
+
 
 @app.route("/retrieveRequest")
 @login_required
 def retrieveRequest():
-    return render_template("retrieveRequest.html", user=current_user, values=Request.query.all())
+    user = User.query.filter_by(email=current_user.email).first()
+    return render_template("retrieveRequest.html", user=current_user, values=user.requests)
+
+
+@app.route("/request/detail/<id>", methods=['POST'])
+@login_required
+def requestDetail(id):
+    smallItems = False
+    bigItems = False
+    my_data = Request.query.get(id)
+    print("items = ", my_data.items)
+    if my_data.items.__contains__("battery") and my_data.items.__contains__("smartphone") and my_data.items.__contains__("bulb"):
+        smallItems = True
+    if my_data.items.__contains__("television"):
+        bigItems = True
+
+    return render_template("requestDetail.html", bigItems=bigItems, smallItems=smallItems, user=current_user, items=my_data.items)
+
+
+@app.route('/request/update', methods=['GET', 'POST'])
+@login_required
+def updateRequest():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('retrieveRequest'))
 
 
 @app.route('/dashboard')
@@ -384,6 +448,27 @@ def types_of_ewaste():
 @login_required
 def viewAllUsers():
     return render_template("viewAllUsers.html", user=current_user, values=User.query.all())
+
+
+@app.route('/userProfile', methods=['GET', 'POST'])
+@login_required
+def consumerUpdateUser():
+
+    if request.method == 'POST':
+        my_data = User.query.get(request.form.get('id'))
+
+        my_data.username = request.form['username']
+        my_data.street_address = request.form['street_address']
+        my_data.unit_number = request.form['unit_number']
+        my_data.block_number = request.form['block_number']
+
+        db.session.commit()
+        flash("Profile Updated Successfully")
+
+        # values=
+        return render_template("userProfile.html", user=current_user,)
+
+    return render_template("userProfile.html", user=current_user,)  # values=
 
 
 @app.route("/manageRequests")
@@ -420,6 +505,26 @@ def delete(id):
     return redirect(url_for('viewAllUsers'))
 
 
+@app.route('/request/delete/<id>/', methods=['POST'])
+def deleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('retrieveRequest'))
+
+
+@app.route('/admin/request/delete/<id>/', methods=['POST'])
+def adminDeleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('manageRequests'))
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -427,6 +532,7 @@ def logout():
     return redirect(url_for('index'))
 
 # our models
+
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -469,7 +575,7 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-31-val_acc-0.848.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
