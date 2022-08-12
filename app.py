@@ -29,6 +29,8 @@ import cv2
 from email.message import EmailMessage
 import ssl
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = "kelvin-tan"
@@ -265,15 +267,55 @@ def createRequest():
 
     return render_template('createRequest.html', form=form, user=current_user)
 
+def sendPINEmail(pin, email): # will update this
+    email_sender = ""
+    email_password = ""
+    email_receiver = email
+
+    subject = "Your PIN to recycle the E-waste"
+
+    #HTML Message Part
+    html = """\
+    <html>
+    <body style="font-family: 'Poppins', sans-serif;" >
+        <p>Dear customer,</p>
+        <p>THANK YOU FOR RECYCLING!</p>
+        <br>
+        <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
+        <p>Do use this only for the E-Wastes that you have scanned previously.</p>
+        <p>Thanks,</p>
+        <h2 style="color: #a4c639;">RECYCLEIT</h2>
+    </body>
+    </html>
+    """.format(pin)
+
+    part = MIMEText(html, "html")
+                
+    em = MIMEMultipart("alternative")
+    em["From"] = email_sender
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.attach(part)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+        
+    return
+
 @app.route("/getPIN",  methods=['GET', 'POST'])
 def getPIN():
     form = PINForm()
-    # generate pin
-    generated_num = np.random.randint(9,size=(4))
-    pin = ""
-    for i in generated_num:
-        pin += str(i)
-    print("the pin is: ", pin )
+
+    # generate pin and check if exists in db
+    while True:
+        generated_num = np.random.randint(9,size=(4))
+        pin = ""
+        for i in generated_num:
+            pin += str(i)
+        pinExists = PIN.query.filter_by(pin=pin).first()
+        if pinExists == None:
+            break
 
     if current_user.is_authenticated:
         user = User.query.filter_by(email=current_user.email).first()
@@ -284,24 +326,7 @@ def getPIN():
             db.session.commit()
 
             # send pin to email 
-            email_sender = "wongchekhei.11810@gmail.com"
-            email_password = "fwylltranfgssyxi"
-            email_receiver = str(form.email.data)
-
-            subject = "Your PIN to recycle the E-waste"
-            body = """
-            Your PIN is:
-            """ + pin
-
-            em = EmailMessage()
-            em["From"] = email_sender
-            em["To"] = email_receiver
-            em["Subject"] = subject
-            em.set_content(body)
-
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
-                smtp.login(email_sender, email_password)
-                smtp.sendmail(email_sender, email_receiver, em.as_string())
+            sendPINEmail(pin, str(user.email))
 
             get_pin=PIN.query.filter_by(email=current_user.email).first()
             return render_template('getPIN.html', user=current_user, get_pin=get_pin)
@@ -316,29 +341,12 @@ def getPIN():
             has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
-                new_pin = PIN(pin=pin, username="not registered", email=form.email.data)
+                new_pin = PIN(pin=pin, username="NotRegisteredUser", email=form.email.data)
                 db.session.add(new_pin)
                 db.session.commit()
 
                 # send pin to email 
-                email_sender = "wongchekhei.11810@gmail.com"
-                email_password = "fwylltranfgssyxi"
-                email_receiver = str(form.email.data)
-
-                subject = "Your PIN to recycle the E-waste"
-                body = """
-                Your PIN is:
-                """ + pin
-
-                em = EmailMessage()
-                em["From"] = email_sender
-                em["To"] = email_receiver
-                em["Subject"] = subject
-                em.set_content(body)
-
-                with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
-                    smtp.login(email_sender, email_password)
-                    smtp.sendmail(email_sender, email_receiver, em.as_string())
+                sendPINEmail(pin, str(form.email.data))
 
                 get_pin=PIN.query.filter_by(email=form.email.data).first()
                 return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin)
