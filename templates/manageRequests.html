@@ -64,7 +64,7 @@ Retrieve Request
                 <!--    Delete button-->
                 <td>
                     <!--Points to delete_enquiry() function in __init__.py    id is needed so that you can delete the particular record with the id-->
-                    <form action="/user/delete/{{item.id}}/" method="POST">
+                    <form action="/admin/request/delete/{{item.id}}/" method="POST">
 
                         <!-- Delete Button that opens the modal once clicked -->
                         <button type="button" class="btn btn-danger" data-toggle="modal"
@@ -85,7 +85,7 @@ Retrieve Request
 
                                     <!-- Modal body -->
                                     <div class="modal-body">
-                                        Are you sure you want to delete {{item.email}}?
+                                        Are you sure you want to delete the request of {{item.items}}?
                                     </div>
 
                                     <!-- Modal footer -->
