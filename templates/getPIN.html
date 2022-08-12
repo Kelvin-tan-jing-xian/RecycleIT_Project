@@ -8,29 +8,63 @@ Get PIN
 
 {% block content %}
 
-{% if user.is_authenticated %}
-    {% if hasPIN %}
-        <p>you have a pin already! </p>
-    {% else %}
-        <p>{{ get_pin.email }}</p>
-        <p>{{ get_pin.time_created }}</p>
-        <p>the pin is: {{ get_pin.pin }}</p>
-        <p>{{ get_pin.username }}</p>
-    {% endif %}
+<div class="getPIN">
+    {% if user.is_authenticated %}
+        {% if hasPIN %}
+            <h3> you have a pin already! </h3>
+            <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
+            <p><strong>Don't worry!</strong> You will still get your points for the new batch of items added to your current PIN. 
+                <br>
+                <a href="">Add items to current PIN</a> <!-- not done yet -->
+            </p>
+            
+        {% else %}
+            <h3>Thank you for recycling!</h3>
+            <p>The 4-digit PIN to access any of our bins has been sent to: {{ user.email }}.</p>
+        {% endif %}
 
-{% else %}
-    {% if hasPIN %}
-        <p>you have a pin already! </p>
     {% else %}
-        <p>the pin is: {{ get_pin.pin }}</p>
-        <form method="POST">
-            <div class="form-group">
-            {{ wtf.form_field(form.email) }}
-            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        {% if hasPIN %}
+            <h3> you have a pin already! </h3>
+            <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
+            <p>However, since you did not register for an account with us, you <br><strong>will not recieve any points</strong> for your previous and current batch of items. 
+                <br>
+                <a href="">Add items to current PIN</a> <!-- not done yet -->
+            </p>
+        {% elif sent == False %}
+            <h3>Thank you for recycling!</h3>
+            <p>Have an account? <strong><a href="{{ url_for('login') }}" >Login</a></strong> first and click on "GET PIN" again to continue the process.</p>
+            <p>Or you can create an account with us! <strong><a href="{{ url_for('signup') }}">Sign up</a></strong> now.</p>
+            <p>You will gain points for each item recycled after you registered for an account!</p>
+            <br>
+            <p><strong>Do not want to create an account?</strong></p>
+            <p>Simply enter your email and we will send you the PIN. 
+                <br>But do note that <strong>NO</strong> points will be awarded without an account.</p>
+            <br>
+            <form method="POST">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            {{ wtf.form_field(form.email) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7"></div>
+                        <div class="col-md-2">
+                            <button type="submit" style="border: none;"><a class="filled-button">Submit</a></button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <br>
+        {% elif sent == True %}
+            <h3>Thank you for recycling!</h3>
+            <p>The 4-digit PIN to access any of our bins has been sent to: {{ email }}.</p>
+        {% endif %}
     {% endif %}
-{% endif %}
+</div>
+
 
 {% endblock %}

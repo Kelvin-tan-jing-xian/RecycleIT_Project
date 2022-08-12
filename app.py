@@ -363,7 +363,7 @@ def sendPINEmail(pin, email):
 @app.route("/getPIN",  methods=['GET', 'POST'])
 def getPIN():
     form = PINForm()
-
+    sent = False
      # generate pin and check if exists in db
     while True:
         generated_num = np.random.randint(9,size=(4))
@@ -394,7 +394,7 @@ def getPIN():
     else:
         hasPIN = False
         if request.method == "POST":  # for user not logged in
-
+            
             has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
@@ -404,16 +404,19 @@ def getPIN():
                 db.session.commit()
 
                 # send pin to email
-                sendPINEmail(pin, str(form.email.data))
+                email = str(form.email.data)
+                sendPINEmail(pin, email)
+
+                sent = True
 
                 get_pin = PIN.query.filter_by(email=form.email.data).first()
-                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin)
+                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email)
 
             else:
                 hasPIN = True
                 print("you have a PIN already!")
 
-    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], hasPIN=hasPIN)
+    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], hasPIN=hasPIN, sent=sent)
 
 
 @app.route("/retrieveRequest")
@@ -600,8 +603,8 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        # 'kelvin-saved-model-53-val_acc-0.814.hdf5' 
-        model_kelvin = load_model('kelvin-saved-model-31-val_acc-0.848.hdf5')
+        # do not have this model yet: 'kelvin-saved-model-31-val_acc-0.848.hdf5'
+        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
