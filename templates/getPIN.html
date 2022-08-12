@@ -25,12 +25,19 @@ Get PIN
 
     {% else %}
         {% if hasPIN %}
-            <h3> you have a pin already! </h3>
-            <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
-            <p>However, since you did not register for an account with us, you <br><strong>will not recieve any points</strong> for your previous and current batch of items. 
-                <br>
-                <a href="">Add items to current PIN</a> <!-- not done yet -->
-            </p>
+            {% if isRegistered == False %}
+                <h3> you have a pin already! </h3>
+                <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
+                <p>However, since you did not register for an account with us, you <br><strong>will not recieve any points</strong> for your previous and current batch of items. 
+                    <br>
+                    <a href="">Add items to current PIN</a> <!-- not done yet -->
+                </p>
+            {% else %} <!-- user email is registered but never login -->
+                <h3>You have a pin already!</h3>
+                <p><strong>The email entered is registered.</strong></p>
+                <p>Please <strong><a href="{{ url_for('login') }}" >login</a></strong> and add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
+                <p>After login, click on "Get PIN" --> "Add items to current PIN" to add items and gain points!</p>
+            {% endif %}
         {% elif sent == False %}
             <h3>Thank you for recycling!</h3>
             <p>Have an account? <strong><a href="{{ url_for('login') }}" >Login</a></strong> first and click on "GET PIN" again to continue the process.</p>

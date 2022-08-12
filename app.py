@@ -389,10 +389,12 @@ def getPIN():
             return render_template('getPIN.html', user=current_user, get_pin=get_pin)
         else:
             hasPIN = True
+            isRegistered = True
             print("you have a pin already!")
 
     else:
         hasPIN = False
+        isRegistered = False
         if request.method == "POST":  # for user not logged in
             
             has_pin = PIN.query.filter_by(email=form.email.data).first()
@@ -415,8 +417,12 @@ def getPIN():
             else:
                 hasPIN = True
                 print("you have a PIN already!")
+                user = User.query.filter_by(email=form.email.data).first()
+                if user != None:
+                    isRegistered = True
 
-    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], hasPIN=hasPIN, sent=sent)
+    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], 
+                                hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
 
 
 @app.route("/retrieveRequest")
