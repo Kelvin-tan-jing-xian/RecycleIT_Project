@@ -225,7 +225,7 @@ def index():
                         )
         db.session.add(admin)
         db.session.commit()
-    return render_template('index.html', user=current_user, , item_dict=item_dict)
+    return render_template('index.html', user=current_user, item_dict=item_dict)
 
 @app.route('/removeItem/<filename>')
 def removeItem(filename):
