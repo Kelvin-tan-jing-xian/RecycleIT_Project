@@ -602,7 +602,7 @@ def logout():
 @app.route('/api', methods=['POST'])
 def api():
 
-    class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television',
+    class_names = ['lamp', 'power assisted bicycle', 'printer', 'television',
                    'Router', 'battery', 'network switch', 'refrigerator', 'aircon', 'consumer computer',
                    'dryer', 'monitor', 'personal mobility device', 'electric mobility device',
                    'mobile phone', 'network hub', 'set top box', 'washing machine']
