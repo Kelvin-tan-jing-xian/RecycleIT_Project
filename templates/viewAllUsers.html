@@ -42,6 +42,9 @@ ManageUsers
         </thead>
         <tbody>
             {% for item in values %}
+             {% if user.role == "admin" %}
+             {% else %}    
+
             <tr>
                 <th scope="row">{{item.id}}</th>
                 <td>{{item.username}}</td>
@@ -144,7 +147,7 @@ ManageUsers
                 </div>
             
             </div>
-    
+            {% endif %} 
             {% endfor %}
     
     

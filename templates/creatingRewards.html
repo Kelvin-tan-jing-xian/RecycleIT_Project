@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Create Reward
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+  <br>
+  <br>
+  <br>
+
+  <form class="form-signin" method="POST" action="/creatingRewards">
+    <h2 class="form-signin-heading"><strong>Reward details</strong></h2>
+    {{ wtf.form_field(form.description) }}
+    {{ wtf.form_field(form.cost) }}
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Create reward</button>
+  </form>
+
+</div> <!-- /container -->
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+{% endblock %}
