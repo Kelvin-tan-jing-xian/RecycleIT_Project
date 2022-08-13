@@ -612,7 +612,7 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('kelvin-saved-model-31-val_acc-0.848.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-34-val_acc-0.870.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
