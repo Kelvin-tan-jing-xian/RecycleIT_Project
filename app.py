@@ -191,16 +191,17 @@ class PINForm(FlaskForm):
 @app.route('/')
 def index():
     item_dict = {}
-    if "AddedItems" in session: # checking if any session existed
+    if "AddedItems" in session:  # checking if any session existed
         print("AddedItems session found")
         item_dict = session["AddedItems"]
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
 
+
 @app.route('/removeItem/<filename>')
 def removeItem(filename):
     item_dict = {}
-    if "AddedItems" in session: # checking if any session existed
+    if "AddedItems" in session:  # checking if any session existed
         print("removing item", filename)
         item_dict = session["AddedItems"]
 
@@ -209,8 +210,9 @@ def removeItem(filename):
 
     for i in item_dict:
         print(i, item_dict[i])
-    
+
     return render_template('index.html', user=current_user, item_dict=item_dict)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -323,6 +325,7 @@ def createRequest():
 
     return render_template('createRequest.html', form=form, user=current_user)
 
+
 def sendPINEmail(pin, email):
     email_sender = "RecycleIT.main@gmail.com"
     email_password = "oigpybczvniwkbux"
@@ -330,7 +333,7 @@ def sendPINEmail(pin, email):
 
     subject = "Your PIN to recycle the E-waste"
 
-    #HTML Message Part
+    # HTML Message Part
     html = """\
             <html>
             <body style="font-family: 'Poppins', sans-serif;" >
@@ -364,9 +367,9 @@ def sendPINEmail(pin, email):
 def getPIN():
     form = PINForm()
     sent = False
-     # generate pin and check if exists in db
+    # generate pin and check if exists in db
     while True:
-        generated_num = np.random.randint(9,size=(4))
+        generated_num = np.random.randint(9, size=(4))
         pin = ""
         for i in generated_num:
             pin += str(i)
@@ -396,7 +399,7 @@ def getPIN():
         hasPIN = False
         isRegistered = False
         if request.method == "POST":  # for user not logged in
-            
+
             has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
@@ -421,8 +424,8 @@ def getPIN():
                 if user != None:
                     isRegistered = True
 
-    return render_template('getPIN.html', form=form, user=current_user, get_pin=[], 
-                                hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
+    return render_template('getPIN.html', form=form, user=current_user, get_pin=[],
+                           hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
 
 
 @app.route("/retrieveRequest")
@@ -609,8 +612,7 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        # do not have this model yet: 'kelvin-saved-model-31-val_acc-0.848.hdf5'
-        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-31-val_acc-0.848.hdf5')
         model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
         model_geoffrey = load_model(
             'geoffrey-saved-model-60-val_acc-0.738.hdf5')
@@ -665,7 +667,7 @@ def api():
 
         # storing items into session
         item_dict = {}
-        if "AddedItems" in session: # checking if any session existed
+        if "AddedItems" in session:  # checking if any session existed
             print("AddedItems session found")
             item_dict = session["AddedItems"]
         else:
