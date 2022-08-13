@@ -1,4 +1,5 @@
 import email
+from re import sub
 import tensorflow
 from flask import Flask, render_template, redirect, request, session, url_for, flash, jsonify, json, abort
 from flask_bootstrap import Bootstrap
@@ -6,13 +7,15 @@ from flask_wtf import FlaskForm
 from tensorflow import keras
 import matplotlib.pyplot as plt
 from wtforms import StringField, PasswordField, BooleanField, RadioField
-from wtforms.validators import InputRequired, Email, Length
+from wtforms.validators import InputRequired, Email, Length, Optional
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
 from werkzeug.utils import secure_filename
+from random import randint
 import os
+from sqlalchemy.sql import func
 import urllib.request
 from keras.models import load_model
 import numpy as np
@@ -23,7 +26,11 @@ from PIL import Image
 from keras.applications import imagenet_utils
 from keras.applications.resnet import decode_predictions
 import cv2
-
+from email.message import EmailMessage
+import ssl
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = "kelvin-tan"
@@ -47,6 +54,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+# database
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,7 +66,7 @@ class User(UserMixin, db.Model):
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
-   
+    requests = db.relationship('Request', backref='user')
 
     def __init__(self, username, email, password, role, street_address, unit_number, block_number):
 
@@ -86,20 +95,41 @@ class Rewards(db.Model):
 
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    time_created = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
     items = db.Column(db.String)
-    username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(15))
+    email = db.Column(db.String(50))
     street_address = db.Column(db.String(100))
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, items, username, email, password, role, street_address, unit_number, block_number):
+    def __init__(self, items, username, email, street_address, unit_number, block_number, user_id):
         self.items = items
         self.username = username
         self.email = email
         self.street_address = street_address
         self.unit_number = unit_number
         self.block_number = block_number
+        self.user_id = user_id
+
+
+class PIN(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time_created = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
+    pin = db.Column(db.String)
+    username = db.Column(db.String(15))
+    email = db.Column(db.String(50))
+
+    def __init__(self, pin, username, email):
+        self.pin = pin
+        self.username = username
+        self.email = email
+
+# forms
 
 
 @login_manager.user_loader
@@ -129,7 +159,7 @@ class RegisterForm(FlaskForm):
     unit_number = StringField(label='Unit Number', validators=[
                               InputRequired()], default='#07-06')
     block_number = StringField(label='Block Number', validators=[
-                               InputRequired()], default='896A')
+                               InputRequired()], default='205')
 
 class createReward(FlaskForm):
     description = StringField(label='Description', validators=[InputRequired(), Length(max=50)])
@@ -137,31 +167,51 @@ class createReward(FlaskForm):
                       ('1', '1 point'), ('2', '2 points'), ('3', '3 points')], default='1')
 
 class RequestForm(FlaskForm):
-    lamp = BooleanField(label='Lamp')
-    router = BooleanField(label='Router')
-    battery = BooleanField(label='Household Batteries')
-    modem = BooleanField(label='Modem')
-    network_switch = BooleanField(label='Network Switch')
-    laptop = BooleanField(label='Laptop')
-    tablet = BooleanField(label='Tablet')
-    smartphone = BooleanField(label='Mobile Phone')
-    fluorescent_tube = BooleanField(label='Consumer Lamp (fluorescent tube)')
-    bulb = BooleanField(label='Consumer Lamp (bulb)')
-    dryer = BooleanField(label='Dryer')
-    washing_machine = BooleanField(label='Washing Machine')
+    lamp = BooleanField(label='Household Lamp', validators=[Optional()])
+    router = BooleanField(label='Router', validators=[Optional()])
+    battery = BooleanField(label='Household Batteries',
+                           validators=[Optional()])
+    modem = BooleanField(label='Modem', validators=[Optional()])
+    network_switch = BooleanField(
+        label='Network Switch', validators=[Optional()])
+    laptop = BooleanField(label='Laptop', validators=[Optional()])
+    tablet = BooleanField(label='Tablet', validators=[Optional()])
+    smartphone = BooleanField(label='Mobile Phone', validators=[Optional()])
+    fluorescent_tube = BooleanField(
+        label='Consumer Lamp (fluorescent tube)', validators=[Optional()])
+    bulb = BooleanField(label='Consumer Lamp (bulb)', validators=[Optional()])
+    dryer = BooleanField(label='Dryer', validators=[Optional()])
+    washing_machine = BooleanField(
+        label='Washing Machine', validators=[Optional()])
     electric_vehicle_battery = BooleanField(
-        label='Consumer Electric Vehicle Battery')
-    pmd = BooleanField(label='Personal Mobility Device')
-    electric_mobility_device = BooleanField(label='Electric Mobility Device')
-    aircon = BooleanField(label='Air-conditioner')
-    refrigerator = BooleanField(label='Consumer Refrigerator(=<900L)')
-    television = BooleanField(label='Television')
-    printer = BooleanField(label='Printer (less than 20kg)')
-    power_assisted_bicycle = BooleanField(label='Power Assisted Bicycle (PAB)')
+        label='Consumer Electric Vehicle Battery', validators=[Optional()])
+    pmd = BooleanField(label='Personal Mobility Device',
+                       validators=[Optional()])
+    electric_mobility_device = BooleanField(
+        label='Electric Mobility Device', validators=[Optional()])
+    aircon = BooleanField(label='Air-conditioner', validators=[Optional()])
+    refrigerator = BooleanField(
+        label='Consumer Refrigerator(=<900L)', validators=[Optional()])
+    television = BooleanField(label='Television', validators=[Optional()])
+    printer = BooleanField(
+        label='Printer (less than 20kg)', validators=[Optional()])
+    power_assisted_bicycle = BooleanField(
+        label='Power Assisted Bicycle (PAB)', validators=[Optional()])
+
+
+class PINForm(FlaskForm):
+    email = StringField('email', validators=[
+                        InputRequired(), Length(min=4, max=50)])
+
+# route
 
 
 @app.route('/',  methods=['GET', 'POST'])
 def index():
+    item_dict = {}
+    if "AddedItems" in session:  # checking if any session existed
+        print("AddedItems session found")
+        item_dict = session["AddedItems"]
     if (db.session.query(User.email).filter_by(email='admin123@gmail.com').first() == None): 
         hashed_password = generate_password_hash(
             "admin123", method='sha256')
@@ -175,9 +225,22 @@ def index():
                         )
         db.session.add(admin)
         db.session.commit()
-    return render_template('index.html', user=current_user)
+    return render_template('index.html', user=current_user, , item_dict=item_dict)
 
+@app.route('/removeItem/<filename>')
+def removeItem(filename):
+    item_dict = {}
+    if "AddedItems" in session:  # checking if any session existed
+        print("removing item", filename)
+        item_dict = session["AddedItems"]
 
+    item_dict.pop(filename)
+    session["AddedItems"] = item_dict
+
+    for i in item_dict:
+        print(i, item_dict[i])
+
+    return render_template('index.html', user=current_user, item_dict=item_dict)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -194,9 +257,7 @@ def login():
                     session["username"] = user.username
                     return redirect(url_for('dashboard'))
                 else:
-                    session["email"] = user.email
-                    session["username"] = user.username
-                    return redirect(url_for('consumerHome'))
+                    return redirect(url_for('createRequest'))
             else:
                 flash("Incorrect Username or password")
 
@@ -223,7 +284,7 @@ def signup():
                         role=form.role.data,
                         street_address=form.street_address.data,
                         unit_number=form.unit_number.data,
-                        block_number=form.block_number.data)
+                        block_number=form.block_number.data,)
         db.session.add(new_user)
         db.session.commit()
         session["user_created"] = new_user.email
@@ -232,37 +293,212 @@ def signup():
     return render_template('signup.html', form=form, user=current_user)
 
 
-@app.route('/createRequest', methods=['POST'])
+@app.route('/createRequest', methods=['GET', 'POST'])
+@login_required
 def createRequest():
     form = RequestForm()
 
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(
-            form.password.data, method='sha256')
+    if request.method == "POST":
         user = User.query.filter_by(email=current_user.email).first()
+        items = ""
+        if form.network_switch.data is True:
+            items = "network switch"
+        if form.aircon.data is True:
+            items = items + ", aircon"
+        if form.battery.data is True:
+            items = items + ", battery"
+        if form.dryer.data is True:
+            items = items + ", dryer"
+        if form.bulb.data is True:
+            items = items + ", bulb"
+        if form.electric_mobility_device.data is True:
+            items = items + ", electric mobility device"
+        if form.electric_vehicle_battery.data is True:
+            items = items + ", electric vehicle battery"
 
-        new_request = Request(username=user.username,
+        if form.fluorescent_tube.data is True:
+            items += ", fluorescent tube"
+        if form.laptop.data is True:
+            items += ", laptop"
+        if form.lamp.data is True:
+            items += ", household lamp"
+        if form.modem.data is True:
+            items += ", modem"
+        if form.pmd.data is True:
+            items += ", pmd"
+        if form.power_assisted_bicycle.data is True:
+            items += ", power assisted bicycle"
+        if form.printer.data is True:
+            items += ", printer"
+        if form.refrigerator.data is True:
+            items += ", refrigerator"
+        if form.router.data is True:
+            items += ", router"
+        if form.smartphone.data is True:
+            items += ", smartphone"
+        if form.tablet.data is True:
+            items += ", tablet"
+        if form.television.data is True:
+            items += ", television"
+        if form.washing_machine.data is True:
+            items += ", washing machine"
+        new_request = Request(items=items,
+                              username=user.username,
                               email=user.email,
                               street_address=user.street_address,
                               unit_number=user.unit_number,
-                              block_number=user.block_number)
+                              block_number=user.block_number,
+                              user_id=user.id)
         db.session.add(new_request)
         db.session.commit()
         return redirect("/retrieveRequest")
 
-    return render_template('consumerHome.html', user=current_user)
+    return render_template('createRequest.html', form=form, user=current_user)
+
+
+def sendPINEmail(pin, email):
+    email_sender = "RecycleIT.main@gmail.com"
+    email_password = "oigpybczvniwkbux"
+    email_receiver = email
+
+    subject = "Your PIN to recycle the E-waste"
+
+    # HTML Message Part
+    html = """\
+            <html>
+            <body style="font-family: 'Poppins', sans-serif;" >
+                <p>Dear customer,</p>
+                <p>THANK YOU FOR RECYCLING!</p>
+                <br>
+                <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
+                <p>Do use this only for the E-Wastes that you have scanned previously.</p>
+                <p>Thanks,</p>
+                <h2 style="color: #a4c639;">RECYCLEIT</h2>
+            </body>
+            </html>
+            """.format(pin)
+
+    part = MIMEText(html, "html")
+
+    em = MIMEMultipart("alternative")
+    em["From"] = email_sender
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.attach(part)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+    return
+
+
+@app.route("/getPIN",  methods=['GET', 'POST'])
+def getPIN():
+    form = PINForm()
+    sent = False
+    # generate pin and check if exists in db
+    while True:
+        generated_num = np.random.randint(9, size=(4))
+        pin = ""
+        for i in generated_num:
+            pin += str(i)
+        pinExists = PIN.query.filter_by(pin=pin).first()
+        if pinExists == None:
+            break
+
+    if current_user.is_authenticated:
+        user = User.query.filter_by(email=current_user.email).first()
+        has_pin = PIN.query.filter_by(email=current_user.email).first()
+        if has_pin == None:
+            new_pin = PIN(pin=pin, username=user.username, email=user.email)
+            db.session.add(new_pin)
+            db.session.commit()
+
+            # send pin to email
+            sendPINEmail(pin, str(user.email))
+
+            get_pin = PIN.query.filter_by(email=current_user.email).first()
+            return render_template('getPIN.html', user=current_user, get_pin=get_pin)
+        else:
+            hasPIN = True
+            isRegistered = True
+            print("you have a pin already!")
+
+    else:
+        hasPIN = False
+        isRegistered = False
+        if request.method == "POST":  # for user not logged in
+
+            has_pin = PIN.query.filter_by(email=form.email.data).first()
+            print("this is has pin", has_pin)
+            if has_pin == None:
+                new_pin = PIN(pin=pin, username="NotRegisteredUser",
+                              email=form.email.data)
+                db.session.add(new_pin)
+                db.session.commit()
+
+                # send pin to email
+                email = str(form.email.data)
+                sendPINEmail(pin, email)
+
+                sent = True
+
+                get_pin = PIN.query.filter_by(email=form.email.data).first()
+                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email)
+
+            else:
+                hasPIN = True
+                print("you have a PIN already!")
+                user = User.query.filter_by(email=form.email.data).first()
+                if user != None:
+                    isRegistered = True
+
+    return render_template('getPIN.html', form=form, user=current_user, get_pin=[],
+                           hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
+
+
+@app.route("/retrieveRequest")
+@login_required
+def retrieveRequest():
+    user = User.query.filter_by(email=current_user.email).first()
+    return render_template("retrieveRequest.html", user=current_user, values=user.requests)
+
+
+@app.route("/request/detail/<id>", methods=['POST'])
+@login_required
+def requestDetail(id):
+    smallItems = False
+    bigItems = False
+    my_data = Request.query.get(id)
+    print("items = ", my_data.items)
+    if my_data.items.__contains__("battery") and my_data.items.__contains__("smartphone") and my_data.items.__contains__("bulb"):
+        smallItems = True
+    if my_data.items.__contains__("television"):
+        bigItems = True
+
+    return render_template("requestDetail.html", bigItems=bigItems, smallItems=smallItems, user=current_user, items=my_data.items)
+
+
+@app.route('/request/update', methods=['GET', 'POST'])
+@login_required
+def updateRequest():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('retrieveRequest'))
 
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
-
-
-@app.route('/consumerHome')
-@login_required
-def consumerHome():
-    return render_template('consumerHome.html', name=current_user.username, user=current_user)
 
 
 @app.route('/education')
@@ -279,6 +515,33 @@ def types_of_ewaste():
 @login_required
 def viewAllUsers():
     return render_template("viewAllUsers.html", user=current_user, values=User.query.all())
+
+
+@app.route('/userProfile', methods=['GET', 'POST'])
+@login_required
+def consumerUpdateUser():
+
+    if request.method == 'POST':
+        my_data = User.query.get(request.form.get('id'))
+
+        my_data.username = request.form['username']
+        my_data.street_address = request.form['street_address']
+        my_data.unit_number = request.form['unit_number']
+        my_data.block_number = request.form['block_number']
+
+        db.session.commit()
+        flash("Profile Updated Successfully")
+
+        # values=
+        return render_template("userProfile.html", user=current_user,)
+
+    return render_template("userProfile.html", user=current_user,)  # values=
+
+
+@app.route("/manageRequests")
+@login_required
+def manageRequests():
+    return render_template("manageRequests.html", user=current_user, values=Request.query.all())
 
 
 @app.route('/user/update', methods=['GET', 'POST'])
@@ -309,6 +572,26 @@ def delete(id):
     return redirect(url_for('viewAllUsers'))
 
 
+@app.route('/request/delete/<id>/', methods=['POST'])
+def deleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('retrieveRequest'))
+
+
+@app.route('/admin/request/delete/<id>/', methods=['POST'])
+def adminDeleteRequest(id):
+    my_data = Request.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Request Deleted Successfully")
+
+    return redirect(url_for('manageRequests'))
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -316,71 +599,11 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/creatingRewards', methods=['GET', 'POST'])
-def creatingRewards():
-    form = createReward()
-    print("1")
-    if request.method == 'POST' and form.validate_on_submit():
-        print("3")
-        print(form.description.data)
-        new_reward = Rewards(
-                        username="",
-                        email="",
-                        description=form.description.data,
-                        cost=form.cost.data
-        )
-        db.session.add(new_reward)
-        db.session.commit()
-        print("4")
-        return redirect(url_for('allRewards'))
-    print("2")
-    return render_template('creatingRewards.html', form=form, user=current_user)
-
-@app.route('/deleteRewards/<id>/', methods=['POST'])
-def deleteReward(id):
-    reward = Rewards.query.get(id)
-    db.session.delete(reward)
-    db.session.commit()
-    flash("Reward Deleted Successfully")
-
-    return redirect(url_for('allRewards'))
-
-
-@app.route('/getReward/<id>/', methods=['POST'])
-def getReward(id):
-    reward = Rewards.query.get(id)
-    reward.username = session["username"]
-    reward.email = session["email"]
-    db.session.commit()
-    flash("User Deleted Successfully")
-
-    return redirect(url_for('displayRewards'))
-
-
-@app.route('/allRewards')
-def allRewards():
-    rewards_list = []
-    rewards = Rewards.query.all()
-    for reward in rewards:
-        rewards_list.append(reward)
-    return render_template('allRewards.html', user=current_user, rewards_list = rewards_list)
-
-
-@app.route('/displayRewards')
-def displayRewards():
-    rewards_list = []
-    rewards = Rewards.query.all()
-    for reward in rewards:
-        if rewards.email == "":
-            rewards_list.append(reward)
-   
-    return render_template('displayRewards.html', rewards=rewards_list, user=current_user)
-
 @app.route('/api', methods=['POST'])
 def api():
 
     class_names = ['electric vehicle battery', 'lamp', 'power assisted bicycle', 'printer', 'television',
-                   'Router', 'battery', 'modem', 'network switch', 'refrigerator', 'aircon', 'consumer computer',
+                   'Router', 'battery', 'network switch', 'refrigerator', 'aircon', 'consumer computer',
                    'dryer', 'monitor', 'personal mobility device', 'electric mobility device',
                    'mobile phone', 'network hub', 'set top box', 'washing machine']
 
@@ -417,11 +640,11 @@ def api():
         img = cv2.resize(img, (img_height, img_width))
         img_normalized = img/255
         print("loading my model")
-        model_kelvin = load_model('kelvin-saved-model-53-val_acc-0.814.hdf5')
-        model_trumen = load_model('trumen-saved-model-59-val_acc-0.832.hdf5')
+        model_kelvin = load_model('kelvin-saved-model-34-val_acc-0.870.hdf5')
+        model_trumen = load_model('trumen-saved-model-38-val_acc-0.952.hdf5')
         model_geoffrey = load_model(
-            'geoffrey-saved-model-58-val_acc-0.866.hdf5')
-        model_khei = load_model('khei-saved-model-55-val_acc-0.837.hdf5')
+            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
+        model_khei = load_model('khei-saved-model-57-val_acc-0.817.hdf5')
         print("model loaded successfully")
 
         predictions_kelvin = model_kelvin.predict(np.array([img_normalized]))
@@ -470,13 +693,24 @@ def api():
         # resp.status_code = 201
         # return resp
 
+        # storing items into session
+        item_dict = {}
+        if "AddedItems" in session:  # checking if any session existed
+            print("AddedItems session found")
+            item_dict = session["AddedItems"]
+        else:
+            print("create new AddedItems session")
+        item_dict.update({filename: item})
+        session["AddedItems"] = item_dict
+
         return render_template('index.html',
                                filename=filename,
                                user=current_user,
                                item=item,
                                showRegulated=showRegulated,
                                showNon=showNon,
-                               subcategory=subcategory
+                               subcategory=subcategory,
+                               item_dict=item_dict
                                )
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif', category='error')

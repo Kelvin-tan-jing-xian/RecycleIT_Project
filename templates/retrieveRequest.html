@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}
+Retrieve Request
+{% endblock %}
+
+
+
+{% block content %}
+<br>
+<br>
+<br>
+<h1>Your doorstep collection requests</h1>
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                    {{message}}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <table class="table table-striped" style="border: 1px solid;">
+        <thead>
+            <tr>
+                <th scope="col">Street Address</th>
+                <th scope="col">Unit Number</th>
+                <th scope="col">Block Number</th>
+                <th scope="col">Item(s) to recycle</th>
+
+                <th scope="col">Action</th>
+    
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in values %}
+            <tr>
+                <td>{{item.street_address}}</td>
+                <td>{{item.unit_number}}</td>
+                <td>{{item.block_number}}</td>
+                <td>{{item.items}}</td>
+
+                <td>
+                    <form action="/request/detail/{{item.id}}" method="POST">
+                        <button type="submit" class="btn btn-primary">Detail</button>
+
+                    </form>
+                </td>
+
+                <td><a href="/request/update/{{item.id}}" class="btn btn-warning" data-toggle="modal" data-target="#modaledit{{item.id}}">Edit</a>
+                </td>
+                <!--    Delete button-->
+                <td>
+                    <form action="/request/delete/{{item.id}}/" method="POST">
+    
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modaldelete{{item.id}}">
+                            Delete
+                        </button>
+    
+                        <!-- The Modal which is taken from w3schools -->
+                        <div class="modal" id="modaldelete{{item.id}}">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+    
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Delete Confirmation</h4>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+    
+                                    <!-- Modal body -->
+                                    <div class="modal-body">
+                                        Are you sure you want to delete your request of {{item.items}}?
+                                    </div>
+    
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <!--Real Delete button-->
+                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                        <!--                    Cancel button that dismisses the modal-->
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    </div>
+    
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </td>
+    
+    
+            </tr>
+            <!-- Modal Edit Employee-->
+            <div id="modaledit{{item.id}}" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Update Information</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                        </div>
+                        <div class="modal-body">
+                            <!-- <form action="{{url_for('update')}}" method="POST">  -->
+                            <form action="/request/update" method="POST">
+                                <input type="hidden" name="id" value="{{item.id}}">
+
+                                <div class="form-group">
+                                    <label>Items to recycle:</label>
+                                    <input type="text" class="form-control" name="items" value="{{item.items}}">                                
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Save</button>
+
+                                </div>
+
+                                
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+            
+            
+                    </div>
+            
+            
+                </div>
+            
+            </div>
+    
+            {% endfor %}
+    
+    
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

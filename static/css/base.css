@@ -83,7 +83,6 @@ a.border-button:hover {
   letter-spacing: 1px;
 }
 
-
 /* Header Style */
 
 header .navbar {
@@ -436,4 +435,59 @@ h1 {
 
 .more-info .right-content p {
 	margin-bottom: 30px;
+}
+.card-requestdetail {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+  font-family: arial;
+}
+
+.price-requestdetail {
+  color: grey;
+  font-size: 22px;
+}
+
+.card-requestdetail a {
+  border: none;
+  outline: 0;
+  padding: 12px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  font-size: 18px;
+}
+
+.card-requestdetail a:hover {
+  opacity: 0.7;
+}
+
+.my-custom-scrollbar {
+  position: relative;
+  height: 330px;
+  overflow: auto;
+  }
+
+.table-wrapper-scroll-y {
+  display: block;
+  }
+
+.getPIN {
+  min-height: 300px;
+}
+
+.getPIN h3, p{
+  text-align: center;
+}
+
+.getPIN h3{
+  margin: 2rem;
+  margin-top: 100px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color:#a4c639;
 }

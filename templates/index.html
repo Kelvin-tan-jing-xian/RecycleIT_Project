@@ -39,22 +39,8 @@ Demo App
                       <span>Upload your E-waste and we will do the job.</span>
                   </div>
               </div>
-              <div class="col-md-12">
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                  {% for message in messages %}
-                    <div class="alert alert-success alert-dismissable" role="alert">
-                      <button type="button" class="close" data-dismiss="alert" aria-label="close">
-                        <span aria-hidden="true">x</span>
-                      </button>
-                      {{message}}
-                    </div>
-                  {% endfor %}
-                {% endif %}
-                {% endwith %}
-
-              </div>
-              <div class="col-md-5">
+              <div class="col-md-4"></div>
+              <div class="col-md-8">
                 <div class="wrapper">
                   <header>Upload E Waste Image</header>
                   <form id="uploadImage" method="post" action="/api" enctype="multipart/form-data">
@@ -66,17 +52,36 @@ Demo App
                     <br>
               
                     <input type="submit" id="submit-button" value="Submit" class="btn btn-info">
-              
+                    
                   </form>
                 </div>
+                
+                <br>
+                <br>
               </div>
+              <div class="col-md-12">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                  {% for message in messages %}
+                  <br>
+                    <div class="alert alert-success alert-dismissable" role="alert">
+                      <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                      </button>
+                      {{message}}
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                {% endwith %}
+              </div>
+              <br>
               <div class="col-md-4">
                   <h4>Your E-waste:</h4>
                   <div class="service-item">
                       <div class="down-content">
                           {% if filename %}
                           <div>
-                            <img width="280" height="280" src="{{ url_for('display_image', filename=filename)}}">
+                            <img width="320" height="290" src="{{ url_for('display_image', filename=filename)}}">
                           </div>
                           {% else %}
                           <p>No file uploaded.</p>
@@ -85,12 +90,76 @@ Demo App
                       </div>
                   </div>
               </div>
-              <div class="col-md-3">
-                <br>
-                <br>
+              <div class="col-md-2">
                 {% if showRegulated %}
-                          
-                <p class="lead" style="font-size:16px;">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. It's subcategory is <b>{{subcategory}}</b>. Go ahead and bring it down to ALBA's <a href="https://alba-ewaste.sg/drop-off-locations/" target="_blank">drop-off location</a>. Feeling lazy? You can request for <a target="_blank" href="https://alba-ewaste.sg/doorstep-collection/">doorstep collection</a> instead!
+                <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16" style="color: #a4c639;">
+                  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>  
+                {% elif showNon %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16" style="color: #c63939;">
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              {% endif %}
+              </div>
+              <div class="col-md-6">
+                <h4>Your uploaded photos:</h4>
+                <br>
+                <table class="table table-wrapper-scroll-y my-custom-scrollbar">
+                  <thead style="position:sticky; top: 0; background-color:#eee;">
+                    <tr>
+                      <th scope="col">Image</th>
+                      <th scope="col">Item name</th>
+                      <th scope="col"></th>
+                      <th scope="col"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if item_dict == {} %}
+                    <tr style="height:100px;">
+                      <td>Try uploading an E-Waste!</td>
+                    </tr>
+                    {% endif %}
+
+                    {% for i in item_dict %}
+                    <tr>
+                      <td>
+                        {% set filename = i %}
+                        <div>
+                            <img width="140" height="140" src="{{ url_for('display_image', filename=filename)}}">
+                        </div>
+                      </td>
+                      <td>{{item_dict[i]}}</td>
+                      <td>
+                        <div class="col-md-2">
+                          {% if item_dict[i] != "" %}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16" style="color: #a4c639;">
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                          </svg>  
+                          {% elif item_dict[i] != "" %}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16" style="color: #c63939;">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                          </svg>
+                        {% endif %}
+                      </td>
+                      <td><a href="{{url_for('removeItem', filename=filename)}}" class="btn"><i class="fa fa-trash-o" style="font-size:24px; margin-top:10px;"></i></td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+                {% if item_dict != {} %}
+                <p style="float: right;">Done adding items?<a href="/getPIN" class="filled-button" style="padding: 6px 15px; margin-left:10px;">get pin</a></p>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                {% if showRegulated %}
+                     
+                <p class="lead" style="font-size:16px;">This is a/an <b>{{item}}</b> and belongs to <b>REGULATED E WASTE</b> category. It's subcategory is <b>{{subcategory}}</b>. Go ahead and bring it down to ALBA's <a href="https://alba-ewaste.sg/drop-off-locations/" target="_blank">drop-off location</a>. Feeling lazy? You can request for <a target="_blank" href="/createRequest">doorstep collection</a> instead!
                 </p>
                 {% elif showNon %}
                 
