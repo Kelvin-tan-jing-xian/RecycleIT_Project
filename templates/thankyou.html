@@ -10,7 +10,12 @@ Unlock Bin
 <div class="getPIN">
     <h3>Thank You!</h3>
     <p>We cannot thank you enough for the items that you just recycled!</p>
-    <p>Let us give it back to you with points that can be used to redeemed for rewards.</p>
-    <p>Check it out <a href="/displayRewards">here</a>.</p>
+    {% if user.is_authenticated %}
+        <p>Let us give it back to you with points that can be used to redeem for rewards.</p>
+        <p>Check it out <a href="/displayRewards">here</a>.</p>
+    {% else %}
+        <p>We hope that you will continue to recycle with us!</p>
+        <p><a href="{{ url_for('signup') }}">Register</a> an account now to recieve points and redeem rewards!</p>
+    {% endif %}
 </div>
 {% endblock %}

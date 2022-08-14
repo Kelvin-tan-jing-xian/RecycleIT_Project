@@ -41,17 +41,16 @@ Demo App
               </div>
               <div class="col-md-4"></div>
               <div class="col-md-8">
-                <div class="wrapper">
-                  <header>Upload E Waste Image</header>
-                  <form id="uploadImage" method="post" action="/api" enctype="multipart/form-data">
+                <div class="wrapper" style="border-radius:2rem;">
+                  <header style="color:#a4c639">Upload E-Waste Image</header>
+                  <form id="uploadImage" method="post" action="/api" enctype="multipart/form-data" style="border-color: #a4c639;">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Upload a picture of your e waste :)</p>
+                    <p style="color:#a4c639">Upload here:</p>
               
                     <input type="file" id="uploadFile" name="file" class="file-input" hidden required>
               
                     <br>
-              
-                    <input type="submit" id="submit-button" value="Submit" class="btn btn-info">
+                    <button type="submit" id="submit-button"  style="border: none; background-color: transparent;"><a class="filled-button">Submit</a></button>
                     
                   </form>
                 </div>

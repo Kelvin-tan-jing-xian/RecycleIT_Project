@@ -15,9 +15,12 @@ Unlock Bin
         <div class="col-sm-12">
             <h3>The bin is unlock!</h3>
             <p>You can now throw your items in the bin!</p>
+            <div class="col-md-12">
+                <img src="../static/images/binGIF.gif" style="height: 180px; padding:10px;">
+            </div>
             <div class="col-md-5"></div>
-                <div class="col-md-2">
-                    <a class="filled-button" href="/doneRecycling">Done</a>
+            <div class="col-md-2">
+                <a class="filled-button" href="/doneRecycling">Done</a>
             </div>
         </div>
     {% else %}
@@ -37,17 +40,8 @@ Unlock Bin
         <div class="col-sm-12">
             <form action="/unlockBin" method="POST">
                 <input type="hidden" name="id" value="{{user.email}}">
+                <div class="col-sm-4"></div>
                 <div class="form-group">
-                    {% if user.is_authenticated == False %}
-                        <div class="col-sm-3">
-                            <h6 class="mb-0">Email</h6>
-                        </div>
-                        <div class="col-sm-9 text-secondary">
-                            <input type="text" class="form-control" name="email">
-                        </div>
-                        <br>
-                    {% endif %}
-                    <div class="col-sm-4"></div>
                     <div class="col-sm-1">
                         <input type="number" min="0" max="9" class="form-control" name="num1">
                     </div>
@@ -68,6 +62,17 @@ Unlock Bin
                     </div>
                 </div>
                 <div class="col-sm-4"></div>
+                <div class="col-sm-12"><br></div>
+                {% if user.is_authenticated == False %}
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-1">
+                            <h6 class="mb-0">Email</h6>
+                        </div>
+                        <div class="col-sm-4 text-secondary">
+                            <input type="text" class="form-control" name="email">
+                        </div>
+                        <br>
+                {% endif %}
                 <div class="col-sm-12"><br></div>
                 <div class="form-group" style="padding:10px;">
                     <div class="col-md-5"></div>

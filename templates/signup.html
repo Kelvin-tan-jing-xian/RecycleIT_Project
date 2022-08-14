@@ -9,27 +9,34 @@ Sign Up
 
 {% block content %}
 
-<div class="container">
-  <br>
-  <br>
-  <br>
+<div class="container" style="width:100%;">
+  <div class="row">
+    <div class="col">
+      <br>
+      <br>
+      <br>
 
-  <form class="form-signin" method="POST" action="/signup">
-    <h2 class="form-signin-heading"><strong>Sign Up</strong></h2>
-    {{ form.hidden_tag() }}
-    {{ wtf.form_field(form.username) }}
-    {{ wtf.form_field(form.email) }}
-    {{ wtf.form_field(form.password) }}
-    <label for="role">Role</label>
-    {{ wtf.form_field(form.role) }}
-    {{ wtf.form_field(form.street_address) }}
-    {{ wtf.form_field(form.unit_number) }}
-    {{ wtf.form_field(form.block_number) }}
+      <form class="form-signin" method="POST" action="/signup">
+        <h2 class="form-signin-heading"><strong>Sign Up</strong></h2>
+        {{ form.hidden_tag() }}
+        <div class="col-md-6">
+          {{ wtf.form_field(form.username) }}
+          {{ wtf.form_field(form.email) }}
+          {{ wtf.form_field(form.password) }}
+          <label for="role">Role</label>
+          {{ wtf.form_field(form.role) }}
+        </div>
+        <div class="col-md-6">
+          {{ wtf.form_field(form.street_address) }}
+          {{ wtf.form_field(form.unit_number) }}
+          {{ wtf.form_field(form.block_number) }}
+        </div>
+        <button type="submit" style="border: none; background-color: transparent; float: right;"><a class="filled-button">Sign up</a></button>
+      </form>
 
-
-
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
-  </form>
+    </div>
+  
+  </div>
 
 </div> <!-- /container -->
 
