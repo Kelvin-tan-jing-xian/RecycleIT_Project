@@ -570,6 +570,51 @@ def itemsHistory():
     itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
     return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
 
+@app.route("/unlockBin",  methods=['GET', 'POST'])
+def unlockBin():
+
+    correct = None
+
+    if current_user.is_authenticated:
+        email = current_user.email
+    else:
+        email = request.form['email']
+
+    if request.method == 'POST':
+        
+        num1 = request.form['num1']
+        num2 = request.form['num2']
+        num3 = request.form['num3']
+        num4 = request.form['num4']
+
+        enteredPIN = str(num1) + str(num2) + str(num3) + str(num4)
+        print("pin entered: ", enteredPIN)
+
+        correctPIN = PIN.query.filter_by(email=email).first()
+        print("correct pin: ", correctPIN.pin)
+        if enteredPIN == str(correctPIN.pin):
+            correct = True
+            return render_template('unlockBin.html', user=current_user, correct=correct)
+        else:
+            correct = False
+    return render_template('unlockBin.html', user=current_user, correct=correct)
+
+@app.route("/doneRecycling")
+def doneRecycling():
+    if current_user.is_authenticated:
+        email = current_user.email
+
+    pin = PIN.query.filter_by(email=email).first()
+    db.session.delete(pin)
+
+    itemsDB = ItemsDB.query.filter_by(email=email).all()
+
+    for i in itemsDB:
+        i.status = "Recycled"
+
+    db.session.commit()
+
+    return render_template('thankyou.html', user=current_user)
 
 @app.route("/retrieveRequest")
 @login_required
@@ -634,7 +679,7 @@ def viewAllUsers():
 @login_required
 def consumerUpdateUser():
 
-    itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+    itemsHistory = ItemsDB.query.filter_by(email=current_user.email, status="NotRecycled").all()
     first2item = []
     length = 0
 
