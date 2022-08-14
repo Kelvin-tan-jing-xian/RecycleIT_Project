@@ -456,7 +456,7 @@ def getPIN():
             sendPINEmail(pin, str(user.email))
 
             # add items to ItemsDB and link to PIN
-            addtoItemsDB(email)
+            addtoItemsDB(str(user.email))
 
             get_pin = PIN.query.filter_by(email=current_user.email).first()
             return render_template('getPIN.html', user=current_user, get_pin=get_pin)
@@ -518,7 +518,8 @@ def addItemsToPIN(email):
                 <p>Dear customer,</p>
                 <p>THANK YOU FOR RECYCLING!</p>
                 <br>
-                <span>You can recycle your new batch of items together with the previous batch.<br>
+                <span>You can recycle your new batch of items together with the previous batch.
+                <br>
                 Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2></span>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
@@ -538,7 +539,28 @@ def addItemsToPIN(email):
         smtp.login(email_sender, email_password)
         smtp.sendmail(email_sender, email_receiver, em.as_string())
 
-    return render_template('itemsHistory.html')
+    item_dict = {}
+    if "AddedItems" in session:  # checking if any session existed
+        print("AddedItems session found")
+        item_dict = session["AddedItems"]
+
+    # clear session
+    item_dict.clear()
+    session["AddedItems"] = item_dict
+
+    if current_user.is_authenticated:
+        itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+        return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
+
+    else:
+        return render_template("index.html")
+
+
+@app.route("/itemsHistory")
+@login_required
+def itemsHistory():
+    itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+    return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
 
 @app.route("/retrieveRequest")
 @login_required
@@ -603,6 +625,15 @@ def viewAllUsers():
 @login_required
 def consumerUpdateUser():
 
+    itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+    first2item = []
+    length = 0
+
+    for i in itemsHistory:
+        length += 1
+        if len(first2item) <= 1 :
+            first2item.append(i)
+
     if request.method == 'POST':
         my_data = User.query.get(request.form.get('id'))
 
@@ -615,9 +646,9 @@ def consumerUpdateUser():
         flash("Profile Updated Successfully")
 
         # values=
-        return render_template("userProfile.html", user=current_user,)
+        return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)
 
-    return render_template("userProfile.html", user=current_user,)  # values=
+    return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)  # values=
 
 
 @app.route("/manageRequests")

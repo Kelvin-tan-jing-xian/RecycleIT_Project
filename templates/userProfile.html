@@ -8,7 +8,7 @@ Dashboard
 
 {% block content %}
 
-<div class="container-fluid">
+<!-- <div class="container-fluid">
     <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
             <ul class="nav nav-sidebar">
@@ -77,6 +77,146 @@ Dashboard
 
             </form>
 
+        </div>
+    </div>
+</div> -->
+
+<div class="container">
+    <div class="userProfile">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-column align-items-center text-center">
+                            <img src="../static/images/userIcon.png" alt="user" style="border-radius: 50%;" width="120px">
+                            <div class="mt-3">
+                                <br>
+                                <h4>{{user.username}}</h4>
+                                <br>
+                                <p class="text-secondary mb-1">{{user.email}}</p>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <a href="/itemsHistory">
+                            <div class="col-sm-10">
+                                Recycled items history
+                            </div>
+                            <div class="col-sm-1">
+                                <span>></span>
+                            </div>
+                        </a>
+                        <br>
+                        <hr>
+                        <a href="/displayRewards">
+                            <div class="col-sm-10">
+                                Points & Rewards
+                            </div>
+                            <div class="col-sm-1">
+                                <span>></span>
+                            </div>
+                        </a>
+                        <br>
+                        <hr>
+                        <a href="/retrieveRequest">
+                            <div class="col-sm-10">
+                                Doorstep collection request
+                            </div>
+                            <div class="col-sm-1">
+                                <span>></span>
+                            </div>
+                        </a>
+                        <br>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="d-flex align-items-center mb-3">Pending items to recycle ({{ length }})</h5>
+                                <br>
+
+                                {% if itemsHistory != [] %}
+                                    {% for i in itemsHistory %}
+                                        <div class="col-sm-8">
+                                            <img width="100" height="100" src="{{ url_for('display_image', filename=i.filename)}}">                         
+                                        </div>
+                                        <div class="col-sm-3" style="float: right;">
+                                            {{ i.item }}
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <hr>
+                                        </div>
+                                            
+                                    {% endfor %}
+                                {% else %}
+                                        <p>You have no pending items to recycle.</p>
+                                {% endif %}
+                                <div class="col-sm-9"></div>
+                                <div class="col-sm-2">
+                                    {% if length > 2 %}
+                                        <a href="/itemsHistory">View more...</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-12">
+                                <form action="/userProfile" method="POST">
+                                    <input type="hidden" name="id" value="{{user.id}}">
+                                    <div class="form-group" style="padding:10px;">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-0">Username</h6>
+                                        </div>
+                                        <div class="col-sm-9 text-secondary">
+                                            <input type="text" class="form-control" name="username" value="{{user.username}}">
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <div class="form-group" style="padding:10px;">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-0">Street Address</h6>
+                                        </div>
+                                        <div class="col-sm-9 text-secondary">
+                                            <input type="text" class="form-control" name="street_address" value="{{user.street_address}}">
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <div class="form-group" style="padding:10px;">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-0">Unit Number</h6>
+                                        </div>
+                                        <div class="col-sm-9 text-secondary">
+                                            <input type="text" class="form-control" name="unit_number" value="{{user.unit_number}}">
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <div class="form-group" style="padding:10px;">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-0">Block Number</h6>
+                                        </div>
+                                        <div class="col-sm-9 text-secondary">
+                                            <input type="text" class="form-control" name="block_number" value="{{user.block_number}}">
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <div class="form-group" style="padding:10px;">
+                                        <div class="col-md-10"></div>
+                                        <div class="col-md-2">
+                                            <button type="submit" style="border: none; background-color: transparent;"><a class="filled-button">Save</a></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
