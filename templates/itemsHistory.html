@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}
+Items History
+{% endblock %}
+
+{% block content %}
+
+<div class="itemsHistory">
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">Image</th>
+        <th scope="col">Item</th>
+        <th scope="col">Status</th>
+        <th scope="col">Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in itemsHistory %}
+            <tr>
+                <td><img width="100" height="100" src="{{ url_for('display_image', filename=i.filename)}}"></td>
+                <td>{{ i.item }}</td>
+                <td>{{ i.status }}</td>
+                <td></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+</div>
+
+{% endblock %}

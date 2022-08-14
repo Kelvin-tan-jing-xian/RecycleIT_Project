@@ -90,12 +90,13 @@ class Rewards(db.Model):
     cost = db.Column(db.Integer)
 
 
-    def __init__(self, username, email,name, description, cost):
+    def __init__(self, username, email, description, cost):
         self.username = username
         self.email = email
         self.name = name
         self.description = description
         self.cost = cost
+
 
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -133,6 +134,22 @@ class PIN(db.Model):
         self.username = username
         self.email = email
 
+
+class ItemsDB(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50))
+    status = db.Column(db.String(15))
+    time_created = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
+    item = db.Column(db.String(50))
+    filename = db.Column(db.String)
+
+    def __init__(self, email, status, item, filename):
+        self.email = email
+        self.status = status
+        self.item = item
+        self.filename = filename
+
 # forms
 
 
@@ -165,12 +182,13 @@ class RegisterForm(FlaskForm):
     block_number = StringField(label='Block Number', validators=[
                                InputRequired()], default='205')
 
+
 class createReward(FlaskForm):
     name = StringField(label='Name', validators=[
                            InputRequired(), Length(max=50)])
     description = StringField(label='Description', validators=[InputRequired(), Length(max=50)])
     cost = RadioField(label='Cost',  choices=[
-                      (1, '1 point'), (2, '2 points'), (3, '3 points')], default=1)
+                      ('1', '1 point'), ('2', '2 points'), ('3', '3 points')], default='1')
 
 class RequestForm(FlaskForm):
     lamp = BooleanField(label='Household Lamp', validators=[Optional()])
@@ -218,7 +236,8 @@ def index():
     if "AddedItems" in session:  # checking if any session existed
         print("AddedItems session found")
         item_dict = session["AddedItems"]
-    if (db.session.query(User.email).filter_by(email='admin123@gmail.com').first() == None): 
+
+    if (db.session.query(User.email).filter_by(email='admin123@gmail.com').first() == None):
         hashed_password = generate_password_hash(
             "admin123", method='sha256')
         admin = User(username="admin123",
@@ -232,7 +251,9 @@ def index():
                         )
         db.session.add(admin)
         db.session.commit()
+
     return render_template('index.html', user=current_user, item_dict=item_dict)
+
 
 @app.route('/removeItem/<filename>')
 def removeItem(filename):
@@ -248,6 +269,7 @@ def removeItem(filename):
         print(i, item_dict[i])
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -401,6 +423,26 @@ def sendPINEmail(pin, email):
     return
 
 
+def addtoItemsDB(email):
+    item_dict = {}
+    if "AddedItems" in session:  # checking if any session existed
+        print("AddedItems session found")
+        item_dict = session["AddedItems"]
+
+    for i in item_dict:  # i is the filename, and item_dict[i] is the item
+        if item_dict[i] != "":  # dont add non regulated ewaste
+            new_item = ItemsDB(email=email, status="NotRecycled",
+                               item=item_dict[i], filename=i)
+            db.session.add(new_item)
+            db.session.commit()
+
+    # clear session
+    item_dict.clear()
+    session["AddedItems"] = item_dict
+
+    return
+
+
 @app.route("/getPIN",  methods=['GET', 'POST'])
 def getPIN():
     form = PINForm()
@@ -426,6 +468,9 @@ def getPIN():
             # send pin to email
             sendPINEmail(pin, str(user.email))
 
+            # add items to ItemsDB and link to PIN
+            addtoItemsDB(str(user.email))
+
             get_pin = PIN.query.filter_by(email=current_user.email).first()
             return render_template('getPIN.html', user=current_user, get_pin=get_pin)
         else:
@@ -449,8 +494,10 @@ def getPIN():
                 # send pin to email
                 email = str(form.email.data)
                 sendPINEmail(pin, email)
-
                 sent = True
+
+                # add items to ItemsDB and link to PIN
+                addtoItemsDB(email)
 
                 get_pin = PIN.query.filter_by(email=form.email.data).first()
                 return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email)
@@ -464,6 +511,70 @@ def getPIN():
 
     return render_template('getPIN.html', form=form, user=current_user, get_pin=[],
                            hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
+
+
+@app.route("/addItemsToPIN/<email>")
+def addItemsToPIN(email):
+    addtoItemsDB(email)
+    get_pin = PIN.query.filter_by(email=email).first()
+    pin = get_pin.pin
+
+    email_sender = "RecycleIT.main@gmail.com"
+    email_password = "oigpybczvniwkbux"
+    email_receiver = email
+
+    subject = "Your items to recycle has been updated"
+
+    # HTML Message Part
+    html = """\
+            <html>
+            <body style="font-family: 'Poppins', sans-serif;" >
+                <p>Dear customer,</p>
+                <p>THANK YOU FOR RECYCLING!</p>
+                <br>
+                <span>You can recycle your new batch of items together with the previous batch.
+                <br>
+                Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2></span>
+                <p>Thanks,</p>
+                <h2 style="color: #a4c639;">RECYCLEIT</h2>
+            </body>
+            </html>
+            """.format(pin)
+
+    part = MIMEText(html, "html")
+
+    em = MIMEMultipart("alternative")
+    em["From"] = email_sender
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.attach(part)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+
+    item_dict = {}
+    if "AddedItems" in session:  # checking if any session existed
+        print("AddedItems session found")
+        item_dict = session["AddedItems"]
+
+    # clear session
+    item_dict.clear()
+    session["AddedItems"] = item_dict
+
+    if current_user.is_authenticated:
+        itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+        return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
+
+    else:
+        return render_template("index.html")
+
+
+@app.route("/itemsHistory")
+@login_required
+def itemsHistory():
+    itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+    return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
 
 
 @app.route("/retrieveRequest")
@@ -529,6 +640,15 @@ def viewAllUsers():
 @login_required
 def consumerUpdateUser():
 
+    itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
+    first2item = []
+    length = 0
+
+    for i in itemsHistory:
+        length += 1
+        if len(first2item) <= 1 :
+            first2item.append(i)
+
     if request.method == 'POST':
         my_data = User.query.get(request.form.get('id'))
 
@@ -541,9 +661,9 @@ def consumerUpdateUser():
         flash("Profile Updated Successfully")
 
         # values=
-        return render_template("userProfile.html", user=current_user,)
+        return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)
 
-    return render_template("userProfile.html", user=current_user,)  # values=
+    return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)  # values=
 
 
 @app.route("/manageRequests")
@@ -589,6 +709,7 @@ def deleteRequest(id):
 
     return redirect(url_for('retrieveRequest'))
 
+
 @app.route('/creatingRewards', methods=['GET', 'POST'])
 def creatingRewards():
     form = createReward()
@@ -599,7 +720,6 @@ def creatingRewards():
         new_reward = Rewards(
                         username="",
                         email="",
-                        name=form.name.data,
                         description=form.description.data,
                         cost=form.cost.data
         )
@@ -644,7 +764,7 @@ def allRewards():
     rewards = Rewards.query.all()
     for reward in rewards:
         rewards_list.append(reward)
-    return render_template('allRewards.html', user=current_user, rewards_list = rewards_list)
+    return render_template('allRewards.html', user=current_user, rewards_list=rewards_list)
 
 
 @app.route('/displayRewards')
@@ -693,7 +813,7 @@ def api():
     Lamps_subcategory = ["lamp"]
     img_height = 180
     img_width = 180
-    threshold = 0.74
+    threshold = 0.986
     showRegulated = False
     showNon = False
     if 'file' not in request.files:
