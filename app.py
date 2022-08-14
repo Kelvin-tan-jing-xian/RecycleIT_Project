@@ -67,8 +67,9 @@ class User(UserMixin, db.Model):
     unit_number = db.Column(db.String)
     block_number = db.Column(db.String)
     requests = db.relationship('Request', backref='user')
+    points = db.Column(db.Integer)
 
-    def __init__(self, username, email, password, role, street_address, unit_number, block_number):
+    def __init__(self, username, email, password, role, street_address, unit_number, block_number,points):
 
         self.username = username
         self.email = email
@@ -77,18 +78,22 @@ class User(UserMixin, db.Model):
         self.street_address = street_address
         self.unit_number = unit_number
         self.block_number = block_number
-
+        self.points = points
+     
 
 class Rewards(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(15))
+    email = db.Column(db.String(50))
+    name = db.Column(db.String(50))
     description = db.Column(db.String(100))
-    cost = db.Column(db.String(100))
+    cost = db.Column(db.Integer)
 
-    def __init__(self, username, email, description, cost):
+
+    def __init__(self, username, email, description, cost,name):
         self.username = username
         self.email = email
+        self.name = name
         self.description = description
         self.cost = cost
 
@@ -169,7 +174,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField(label='Password', validators=[
                              InputRequired(), Length(min=8, max=80)])
     role = RadioField(label='Role',  choices=[
-                      ('consumer', 'Sign up as consumer'), ('admin', 'Sign up as admin')], default='consumer')
+                      ('consumer', 'Sign up as consumer')], default='consumer')
     street_address = StringField(label='Street Address', validators=[
                                  InputRequired()], default='Ang Mo Kio Avenue 1')
     unit_number = StringField(label='Unit Number', validators=[
@@ -179,11 +184,11 @@ class RegisterForm(FlaskForm):
 
 
 class createReward(FlaskForm):
-    description = StringField(label='Description', validators=[
-                              InputRequired(), Length(max=50)])
+    name = StringField(label='Name', validators=[
+                           InputRequired(), Length(max=50)])
+    description = StringField(label='Description', validators=[InputRequired(), Length(max=50)])
     cost = RadioField(label='Cost',  choices=[
                       ('1', '1 point'), ('2', '2 points'), ('3', '3 points')], default='1')
-
 
 class RequestForm(FlaskForm):
     lamp = BooleanField(label='Household Lamp', validators=[Optional()])
@@ -236,14 +241,14 @@ def index():
         hashed_password = generate_password_hash(
             "admin123", method='sha256')
         admin = User(username="admin123",
-                     email="admin123@gmail.com",
-                     password=hashed_password,
-                     role="admin",
-                     street_address="none",
-                     unit_number="none",
-                     block_number="none",
-                     )
-
+                        email="admin123@gmail.com",
+                        password=hashed_password,
+                        role="admin",
+                        street_address="none",
+                        unit_number="none",
+                        block_number="none",
+                        points="none"
+                        )
         db.session.add(admin)
         db.session.commit()
 
@@ -279,7 +284,7 @@ def login():
                 if user.role == "admin":
                     session["email"] = user.email
                     session["username"] = user.username
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('viewAllUsers'))
                 else:
                     return redirect(url_for('createRequest'))
             else:
@@ -308,7 +313,8 @@ def signup():
                         role=form.role.data,
                         street_address=form.street_address.data,
                         unit_number=form.unit_number.data,
-                        block_number=form.block_number.data,)
+                        block_number=form.block_number.data,
+                        points=0)
         db.session.add(new_user)
         db.session.commit()
         session["user_created"] = new_user.email
@@ -753,14 +759,15 @@ def deleteRequest(id):
 def creatingRewards():
     form = createReward()
     print("1")
-    if request.method == 'POST' and form.validate_on_submit():
+    if request.method == 'POST':
         print("3")
         print(form.description.data)
         new_reward = Rewards(
-            username="",
-            email="",
-            description=form.description.data,
-            cost=form.cost.data
+                        username="",
+                        email="",
+                        name =form.name.data,
+                        description=form.description.data,
+                        cost=form.cost.data
         )
         db.session.add(new_reward)
         db.session.commit()
@@ -769,8 +776,7 @@ def creatingRewards():
     print("2")
     return render_template('creatingRewards.html', form=form, user=current_user)
 
-
-@app.route('/deleteRewards/<id>/', methods=['POST'])
+@app.route('/deleteRewards/<id>/')
 def deleteReward(id):
     reward = Rewards.query.get(id)
     db.session.delete(reward)
@@ -785,10 +791,17 @@ def getReward(id):
     reward = Rewards.query.get(id)
     reward.username = session["username"]
     reward.email = session["email"]
+    point = current_user.points
+    cost = reward.cost
+    point = point - cost 
+    if (point < 0):
+        point = 0
+    user = User.query.get(session["username"])
+    user.points = point
     db.session.commit()
-    flash("User Deleted Successfully")
 
     return redirect(url_for('displayRewards'))
+
 
 
 @app.route('/allRewards')
@@ -803,12 +816,12 @@ def allRewards():
 @app.route('/displayRewards')
 def displayRewards():
     rewards_list = []
+    cost_list = []
     rewards = Rewards.query.all()
     for reward in rewards:
-        if rewards.email == "":
-            rewards_list.append(reward)
-
-    return render_template('displayRewards.html', rewards=rewards_list, user=current_user)
+        rewards_list.append(reward)
+    point = int(current_user.points)
+    return render_template('displayRewards.html', rewards=rewards_list, user=current_user,point = point)
 
 
 @app.route('/admin/request/delete/<id>/', methods=['POST'])

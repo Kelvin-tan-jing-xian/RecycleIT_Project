@@ -35,29 +35,27 @@
                   
               </div> -->
               
-              <a class="navbar-brand" href="/" style="text-decoration:none;"><h2>RecycleIT</h2></a>
+             
               {% if user.is_authenticated and user.role == "admin" %}
-                  
+              <a class="navbar-brand" href="#" style="text-decoration:none;"><h2>RecycleIT</h2></a>  
 
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                       <ul class="nav navbar-nav navbar-right">
-                          <li><a href="/dashboard" style="text-decoration:none;">Dashboard</a></li>
                           <li><a href="/viewAllUsers" style="text-decoration:none;">Users</a></li>
+                          <li><a href="/manageRequests" style="text-decoration:none;">Collection</a></li>
                           <li><a href="/allRewards" style="text-decoration:none;">Rewards</a></li>
                           <li><a href="{{ url_for('logout') }}" style="text-decoration:none;">Log Out</a></li>
                       </ul>
-                      <form class="navbar-form navbar-right">
-                          <input type="text" class="form-control" placeholder="Search...">
-                      </form>
                   </div>
               {% elif user.is_authenticated and user.role == "consumer" %}
+              <a class="navbar-brand" href="/" style="text-decoration:none;"><h2>RecycleIT</h2></a>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                   <ul class="nav navbar-nav navbar-right">
                     <li><a href="/createRequest" style="text-decoration:none;">Doorstep collection</a></li>
                     <li><a href="/" style="text-decoration:none;">Take picture</a></li>
                     <li><a href="/education" style="text-decoration:none;">Education</a></li>
                     <li><a href="/types_of_ewaste" style="text-decoration:none;">Types of E-Waste</a></li>
-                    <li><a href="/unlockBin" style="text-decoration:none;">Unlock Bin</a></li>
+
                     <li><a href="/userProfile" style="text-decoration:none;">Profile</a></li>
                     <li><a href="{{ url_for('logout') }}" style="text-decoration:none;">Log Out</a></li>
                   </ul>
@@ -65,6 +63,7 @@
                 </div>
 
               {% else %}
+              <a class="navbar-brand" href="/" style="text-decoration:none;"><h2>RecycleIT</h2></a>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                       <ul class="nav navbar-nav navbar-right">
                           <!-- <li class="active"><a href="/">Home</a></li> -->
