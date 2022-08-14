@@ -90,7 +90,7 @@ class Rewards(db.Model):
     cost = db.Column(db.Integer)
 
 
-    def __init__(self, username, email, description, cost):
+    def __init__(self, username, email, description, cost,name):
         self.username = username
         self.email = email
         self.name = name
@@ -720,6 +720,7 @@ def creatingRewards():
         new_reward = Rewards(
                         username="",
                         email="",
+                        name =form.name.data,
                         description=form.description.data,
                         cost=form.cost.data
         )
