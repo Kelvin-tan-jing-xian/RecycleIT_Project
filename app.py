@@ -581,6 +581,66 @@ def deleteRequest(id):
 
     return redirect(url_for('retrieveRequest'))
 
+@app.route('/creatingRewards', methods=['GET', 'POST'])
+def creatingRewards():
+    form = createReward()
+    print("1")
+    if request.method == 'POST' and form.validate_on_submit():
+        print("3")
+        print(form.description.data)
+        new_reward = Rewards(
+                        username="",
+                        email="",
+                        description=form.description.data,
+                        cost=form.cost.data
+        )
+        db.session.add(new_reward)
+        db.session.commit()
+        print("4")
+        return redirect(url_for('allRewards'))
+    print("2")
+    return render_template('creatingRewards.html', form=form, user=current_user)
+
+@app.route('/deleteRewards/<id>/', methods=['POST'])
+def deleteReward(id):
+    reward = Rewards.query.get(id)
+    db.session.delete(reward)
+    db.session.commit()
+    flash("Reward Deleted Successfully")
+
+    return redirect(url_for('allRewards'))
+
+
+@app.route('/getReward/<id>/', methods=['POST'])
+def getReward(id):
+    reward = Rewards.query.get(id)
+    reward.username = session["username"]
+    reward.email = session["email"]
+    db.session.commit()
+    flash("User Deleted Successfully")
+
+    return redirect(url_for('displayRewards'))
+
+
+@app.route('/allRewards')
+def allRewards():
+    rewards_list = []
+    rewards = Rewards.query.all()
+    for reward in rewards:
+        rewards_list.append(reward)
+    return render_template('allRewards.html', user=current_user, rewards_list = rewards_list)
+
+
+@app.route('/displayRewards')
+def displayRewards():
+    rewards_list = []
+    rewards = Rewards.query.all()
+    for reward in rewards:
+        if rewards.email == "":
+            rewards_list.append(reward)
+
+    return render_template('displayRewards.html', rewards=rewards_list, user=current_user)
+
 
 @app.route('/admin/request/delete/<id>/', methods=['POST'])
 def adminDeleteRequest(id):
@@ -643,7 +703,7 @@ def api():
         model_kelvin = load_model('kelvin-saved-model-34-val_acc-0.870.hdf5')
         model_trumen = load_model('trumen-saved-model-38-val_acc-0.952.hdf5')
         model_geoffrey = load_model(
-            'geoffrey-saved-model-60-val_acc-0.738.hdf5')
+            'geoffrey-saved-model-55-val_acc-0.852.hdf5')
         model_khei = load_model('khei-saved-model-57-val_acc-0.817.hdf5')
         print("model loaded successfully")
 
