@@ -11,8 +11,8 @@ All Rewards
 <br>
 <br>
 <h1>Manage all rewards</h1>
-<a href="/createReward" class="btn btn-warning" >Create reward</a>
 <div class="container">
+    <a href="/createReward" class="btn btn-warning" >Create reward</a>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -39,9 +39,9 @@ All Rewards
             {% for reward in rewards_list %}
       
             <tr>
-                <th scope="row">{{item.id}}</th>
-                <td>{{item.description}}</td>
-                <td>{{item.cost}}</td>
+                <th scope="row">{{reward.id}}</th>
+                <td>{{reward.description}}</td>
+                <td>{{reward.cost}}</td>
                 {% if reward.email and reward.username == "" %}
                 <td><a href="/deleteReward/{{ reward.ID }}" class="btn btn-warning" >delete</a>
                 {% endif %}   
