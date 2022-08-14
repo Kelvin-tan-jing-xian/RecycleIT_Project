@@ -77,7 +77,7 @@ class User(UserMixin, db.Model):
         self.street_address = street_address
         self.unit_number = unit_number
         self.block_number = block_number
-     
+
 
 class Rewards(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -86,12 +86,12 @@ class Rewards(db.Model):
     description = db.Column(db.String(100))
     cost = db.Column(db.String(100))
 
-
     def __init__(self, username, email, description, cost):
         self.username = username
         self.email = email
         self.description = description
         self.cost = cost
+
 
 class Request(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -139,7 +139,7 @@ class ItemsDB(db.Model):
     item = db.Column(db.String(50))
     filename = db.Column(db.String)
 
-    def __init__(self, email, status, item, filename ):
+    def __init__(self, email, status, item, filename):
         self.email = email
         self.status = status
         self.item = item
@@ -177,10 +177,13 @@ class RegisterForm(FlaskForm):
     block_number = StringField(label='Block Number', validators=[
                                InputRequired()], default='205')
 
+
 class createReward(FlaskForm):
-    description = StringField(label='Description', validators=[InputRequired(), Length(max=50)])
+    description = StringField(label='Description', validators=[
+                              InputRequired(), Length(max=50)])
     cost = RadioField(label='Cost',  choices=[
                       ('1', '1 point'), ('2', '2 points'), ('3', '3 points')], default='1')
+
 
 class RequestForm(FlaskForm):
     lamp = BooleanField(label='Household Lamp', validators=[Optional()])
@@ -229,22 +232,23 @@ def index():
         print("AddedItems session found")
         item_dict = session["AddedItems"]
 
-    if (db.session.query(User.email).filter_by(email='admin123@gmail.com').first() == None): 
+    if (db.session.query(User.email).filter_by(email='admin123@gmail.com').first() == None):
         hashed_password = generate_password_hash(
             "admin123", method='sha256')
         admin = User(username="admin123",
-                        email="admin123@gmail.com",
-                        password=hashed_password,
-                        role="admin",
-                        street_address="none",
-                        unit_number="none",
-                        block_number="none",
-                        )
+                     email="admin123@gmail.com",
+                     password=hashed_password,
+                     role="admin",
+                     street_address="none",
+                     unit_number="none",
+                     block_number="none",
+                     )
 
         db.session.add(admin)
         db.session.commit()
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
+
 
 @app.route('/removeItem/<filename>')
 def removeItem(filename):
@@ -260,6 +264,7 @@ def removeItem(filename):
         print(i, item_dict[i])
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -411,15 +416,17 @@ def sendPINEmail(pin, email):
 
     return
 
+
 def addtoItemsDB(email):
     item_dict = {}
     if "AddedItems" in session:  # checking if any session existed
         print("AddedItems session found")
         item_dict = session["AddedItems"]
-                
-    for i in item_dict: # i is the filename, and item_dict[i] is the item
-        if item_dict[i] != "": # dont add non regulated ewaste
-            new_item = ItemsDB(email=email, status="NotRecycled", item=item_dict[i], filename=i)
+
+    for i in item_dict:  # i is the filename, and item_dict[i] is the item
+        if item_dict[i] != "":  # dont add non regulated ewaste
+            new_item = ItemsDB(email=email, status="NotRecycled",
+                               item=item_dict[i], filename=i)
             db.session.add(new_item)
             db.session.commit()
 
@@ -499,6 +506,7 @@ def getPIN():
     return render_template('getPIN.html', form=form, user=current_user, get_pin=[],
                            hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
 
+
 @app.route("/addItemsToPIN/<email>")
 def addItemsToPIN(email):
     addtoItemsDB(email)
@@ -539,6 +547,7 @@ def addItemsToPIN(email):
         smtp.sendmail(email_sender, email_receiver, em.as_string())
 
     return render_template('itemsHistory.html')
+
 
 @app.route("/retrieveRequest")
 @login_required
@@ -663,6 +672,7 @@ def deleteRequest(id):
 
     return redirect(url_for('retrieveRequest'))
 
+
 @app.route('/creatingRewards', methods=['GET', 'POST'])
 def creatingRewards():
     form = createReward()
@@ -671,10 +681,10 @@ def creatingRewards():
         print("3")
         print(form.description.data)
         new_reward = Rewards(
-                        username="",
-                        email="",
-                        description=form.description.data,
-                        cost=form.cost.data
+            username="",
+            email="",
+            description=form.description.data,
+            cost=form.cost.data
         )
         db.session.add(new_reward)
         db.session.commit()
@@ -682,6 +692,7 @@ def creatingRewards():
         return redirect(url_for('allRewards'))
     print("2")
     return render_template('creatingRewards.html', form=form, user=current_user)
+
 
 @app.route('/deleteRewards/<id>/', methods=['POST'])
 def deleteReward(id):
@@ -710,7 +721,7 @@ def allRewards():
     rewards = Rewards.query.all()
     for reward in rewards:
         rewards_list.append(reward)
-    return render_template('allRewards.html', user=current_user, rewards_list = rewards_list)
+    return render_template('allRewards.html', user=current_user, rewards_list=rewards_list)
 
 
 @app.route('/displayRewards')
@@ -759,7 +770,7 @@ def api():
     Lamps_subcategory = ["lamp"]
     img_height = 180
     img_width = 180
-    threshold = 0.74
+    threshold = 0.986
     showRegulated = False
     showNon = False
     if 'file' not in request.files:
