@@ -1,0 +1,41 @@
+﻿/*======================================
+    Login CSS
+========================================*/
+.hero-area {
+    padding: 100px 0 50px 0 !important;
+}
+
+.custom-btn {
+    background-color: #007168;
+    color: white;
+}
+
+.login-links {
+    color: #007168 !important;
+}
+
+.features {
+    background-color: #F8F4EC !important;
+}
+
+.account-type {
+    text-align: center !important;
+}
+
+.account-type h3 {
+    padding: 30px 0 0 0;
+}
+
+/*======================================
+    Register CSS
+========================================*/
+.register-header {
+    font-weight: 800;
+}
+
+/* Display None for images when using mobile */
+@media (max-width:991px) {
+    #hero {
+        display:none;
+    }
+}

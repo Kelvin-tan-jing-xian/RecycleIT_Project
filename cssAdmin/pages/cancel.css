@@ -1,0 +1,9 @@
+﻿#cancelBtn, #backBtn {
+    display: inline-block;
+}
+#cancelBtn {
+    float: right;
+}
+#backBtn {
+    background-color: #ff7c74;
+}

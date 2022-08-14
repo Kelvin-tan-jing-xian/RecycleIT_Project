@@ -42,7 +42,7 @@ ManageUsers
         </thead>
         <tbody>
             {% for item in values %}
-             {% if user.role == "admin" %}
+             {% if item.role == "admin" %}
              {% else %}    
 
             <tr>
@@ -57,7 +57,7 @@ ManageUsers
 
 
 
-                <td><a href="/user/update/{{item.id}}" class="btn btn-warning" data-toggle="modal" data-target="#modaledit{{item.id}}">Edit</a>
+             
                 </td>
                 <!--    Delete button-->
                 <td>

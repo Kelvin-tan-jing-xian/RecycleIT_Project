@@ -4,26 +4,51 @@
 Display Rewards
 {% endblock %}
 
-
-
 {% block content %}
-<div class="px-4">
-    <h1><a style="color: #dd4444">Available rewards</a></h1>
-    <div class="row mb-3">
 
-    {% for reward in rewards_list %}
-        <div class="col-sm-6 col-lg-3">
-            <div class="card">
-                <a href="/getReward/{{ reward.ID }}" style="text-decoration: none;">
-              
-                <div class="card-body">
-                    <h5 class="card-title custom-card">{{ reward.cost }}</h5>
-                    <p class="card-text custom-card">~{{ reward.description }}/<br>   </p>
-                </div>
-                </a>
+<br>
+<br>
+<br>
+<div class="p-10 bg-surface-secondary dashboard">
+    <div class="container mt-3">
+        <div class="card">
+                <h1>Available Rewards</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-nowrap">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Cost</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reward in rewards %}
+                                    <tr>
+                                        <td><span>{{ reward.name }}</span></td>
+                                        <td><span>{{ reward.cost }}</span></td>
+                                        <td><span>{{ reward.description }} </span></td>
+                                        {% if point > reward.cost %}
+                                            <td class="text-end">
+                                            <a href="/getReward/{{ reward.id }}" class="btn btn-primary">Get reward</a>
+                                            </td>
+                                        {% elif reward.cost > point %}
+                                            <td class="text-end">
+                                                <button type="button" class="btn btn-lg btn-primary" disabled>Not enough points</button>
+                                            </td>
+                                        {% endif %}   
+                                    </tr>
+                         {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    {% endfor %}
+    </div>
 </div>
 
+
 {% endblock %}
+
+

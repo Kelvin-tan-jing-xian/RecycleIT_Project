@@ -1,0 +1,97 @@
+﻿@import url("https://unpkg.com/@webpixels/css/dist/index.css");
+
+/* navpills */
+.dashboard-content {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 40px;
+    height: 30rem;
+}
+
+.navbar-content {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 8px;
+    height: 3rem;
+    width: 28rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .navbar-content ul ul a {
+        width: 500px;
+    }
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: #007168;
+}
+
+.navbar-content .nav-link {
+    color: black;
+}
+
+/* general */
+
+section {
+    background-color: #F8F4EC !important;
+}
+
+.dashboard {
+    margin-top: 100px;
+    background-color: #F8F4EC !important;
+    height: 90vh;
+}
+
+.center {
+    margin: 0 auto;
+}
+
+.custom-btn {
+    background-color: #007168;
+    color: white;
+}
+
+
+.btn {
+    background-color: #007168;
+    color: white;
+}
+
+.info {
+    display: inline-block;
+    color: black;
+}
+
+.pricing-table {
+    background-color: #F8F4EC !important;
+}
+
+.table-responsive {
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.help-request-actions {
+    font-size: 15px;
+    padding: -15px -15px;
+    border-radius: 8px;
+}
+
+.help-request {
+    color: white;
+}
+
+.dashboard-content {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 40px;
+    height: 30rem;
+}
+
+.home {
+    margin-top: 50px
+}

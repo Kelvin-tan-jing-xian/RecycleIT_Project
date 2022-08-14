@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">`
+    
+    <title>{% block title %}{% endblock %}</title>
+   <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="~/admin/plugins/fontawesome-free/css/all.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="~/admin/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.css">
+    <link rel="stylesheet" href="~/admin/plugins/icheck-bootstrap/icheck-bootstrap.css">
+    <link rel="stylesheet" href="~/admin/plugins/jqvmap/jqvmap.css">
+    <link rel="stylesheet" href="~/admin/dist/css/adminlte.css">
+    <link rel="stylesheet" href="~/admin/plugins/overlayScrollbars/css/OverlayScrollbars.css">
+    <link rel="stylesheet" href="~/admin/plugins/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="~/admin/plugins/summernote/summernote-bs4.css">
+    <link rel="stylesheet" href="~/css/main.css" />
+    <link rel="stylesheet" href="~/css/LineIcons.2.0.css" />
+    <link rel="stylesheet" href="~/css/animate.css" />
+    <link rel="stylesheet" href="~/css/tiny-slider.css" />
+    <link rel="stylesheet" href="~/css/glightbox.min.css" /> -->
+
+    {%- block styles %}
+    <!-- Bootstrap -->
+    <link href="{{bootstrap_find_resource('css/bootstrap.css', cdn='bootstrap')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('.static', filename='/css/base.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/">
+    <link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}"> 
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+   <!-- Bootstrap core CSS -->
+    <!-- <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+
+
+    {%- endblock styles %}
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+    <div class="wrapper">
+
+        <!-- Preloader -->
+        <div class="preloader">
+            <div class="preloader-inner">
+                <div class="preloader-icon">
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+
+            </ul>
+        </nav>
+
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+               
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                      
+                        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+
+                            <div class="image">
+                                <img src="~/images/logo/helpr.svg" class="brand-image img-circle elevation-3" alt="Helpr Logo">
+                            </div>
+                            <div class="info">
+                                <span class="brand-text font-weight-light">Helpr</span>
+                            </div>
+
+                        </div>
+                        <!-- Sidebar user panel (optional) -->
+                        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                            <div class="image">
+                                <img src="~/admin/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                            </div>
+                            <div class="info">
+                                <p class="d-block">Hello Admin</p>
+                            </div>
+                        </div>
+
+                        <!-- Add icons to the links using the .nav-icon class
+                         with font-awesome or any other icon font library -->
+                        <li class="nav-item ">
+                            <a href="/dashboard" class="nav-link ">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>
+                                    Dashboard
+
+                                </p>
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <a href="/viewAllUsers" class="nav-link "></a>
+                                <i class="nav-icon fas fa-table"></i>
+                                <p>
+                                    Users
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/allRewards" class="nav-link ">Rewards</a>
+                                <i class="nav-icon far fa-plus-square"></i>
+                                <p>
+                                    Rewards
+                                </p>
+                            </a>
+
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('logout') }}" class="nav-link ">
+                                <i class="nav-icon far fa-calendar-alt"></i>
+                                <p>
+                                    Logout
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+
+        <div class="content-wrapper">
+            {% block content %}
+
+
+            {% endblock %}
+        
+            <!-- /.content-wrapper -->
+           
+                <footer class="footer">
+                    <div class="footer-top">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-6 col-md-3 item">
+                                    <h3>Services</h3>
+                                    <ul>
+                                        <li><a href="/education">Education</a></li>
+                                        <li><a target="_blank" href= "https://www.reddit.com/r/ALBA_Ewaste/">Forum</a></li>
+                                        
+                                    </ul>
+                                </div>
+                                <div class="col-sm-6 col-md-3 item">
+                                    <h3>About</h3>
+                                    <ul>
+                                        <li><a target="_blank" href="https://alba-ewaste.sg/about-us/">About us</a></li>
+                                        
+                                    </ul>
+                                </div>
+                                <div class="col-md-6 item text">
+                                    <h3>RecycleIT</h3>
+                                    <p>RecycleIT is an AI solutions company based in Singapore. In collaboration with Alba-Ewaste, the features of this website aims to help make recycling easier and hassle free for everyone. </p>
+                                </div>
+                                <div class="col item social"><a target="_blank" href="https://www.facebook.com/ALBASingaporeSC/"><i class="icon ion-social-facebook"></i></a><a target="_blank" href="https://www.instagram.com/alba_singapore/?hl=en"><i class="icon ion-social-instagram"></i></a></div>
+                            </div>
+                            <p class="copyright">RecycleIT© 2022</p>
+                        </div>
+                    </div>
+                </footer>
+            <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script> -->
+    
+            {% block scripts %}
+            <script src="{{bootstrap_find_resource('jquery.js', cdn='jquery')}}"></script>
+            <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>
+            <script src="~/admin/plugins/jquery/jquery.js"></script>
+              <!-- <script src="~/admin/plugins/jquery-ui/jquery-ui.js"></script>
+   
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+   
+    <script src="~/admin/plugins/bootstrap/js/bootstrap.js"></script>
+   
+    <script src="~/admin/plugins/chart.js/Chart.min.js"></script>
+    
+    <script src="~/admin/plugins/sparklines/sparkline.js"></script>
+    
+    <script src="~/admin/plugins/jqvmap/jquery.vmap.js"></script>
+    <script src="~/admin/plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+   
+    <script src="~/admin/plugins/jquery-knob/jquery.knob.min.js"></script>
+   
+    <script src="~/admin/plugins/moment/moment.min.js"></script>
+    <script src="~/admin/plugins/daterangepicker/daterangepicker.js"></script>
+  
+    <script src="~/admin/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.js"></script>
+  
+    <script src="~/admin/plugins/summernote/summernote-bs4.js"></script>
+   
+    <script src="~/admin/plugins/overlayScrollbars/js/jquery.overlayScrollbars.js"></script>
+   
+    <script src="~/admin/dist/js/adminlte.js"></script> -->
+            {%- endblock scripts %}
+    </body>
+</html>
+
+<style>
+    .footer-dark {
+        padding:50px 0;
+        color:#f0f9ff;
+        background-color:#282d32;
+        }
+        
+        .footer-dark h3 {
+        margin-top:0;
+        margin-bottom:12px;
+        font-weight:bold;
+        font-size:16px;
+        }
+        
+        .footer-dark ul {
+        padding:0;
+        list-style:none;
+        line-height:1.6;
+        font-size:14px;
+        margin-bottom:0;
+        }
+        
+        .footer-dark ul a {
+        color:inherit;
+        text-decoration:none;
+        opacity:0.6;
+        }
+        
+        .footer-dark ul a:hover {
+        opacity:0.8;
+        }
+        
+        @media (max-width:767px) {
+        .footer-dark .item:not(.social) {
+            text-align:center;
+            padding-bottom:20px;
+        }
+        }
+        
+        .footer-dark .item.text {
+        margin-bottom:36px;
+        }
+        
+        @media (max-width:767px) {
+        .footer-dark .item.text {
+            margin-bottom:0;
+        }
+        }
+        
+        .footer-dark .item.text p {
+        opacity:0.6;
+        margin-bottom:0;
+        }
+        
+        .footer-dark .item.social {
+        text-align:center;
+        }
+        
+        @media (max-width:991px) {
+        .footer-dark .item.social {
+            text-align:center;
+            margin-top:20px;
+        }
+        }
+        
+        .footer-dark .item.social > a {
+        font-size:20px;
+        width:36px;
+        height:36px;
+        line-height:36px;
+        display:inline-block;
+        text-align:center;
+        border-radius:50%;
+        box-shadow:0 0 0 1px rgba(255,255,255,0.4);
+        margin:0 8px;
+        color:#fff;
+        opacity:0.75;
+        }
+        
+        .footer-dark .item.social > a:hover {
+        opacity:0.9;
+        }
+        
+        .footer-dark .copyright {
+        text-align:center;
+        padding-top:24px;
+        opacity:0.3;
+        font-size:13px;
+        margin-bottom:0;
+        }
+        -->
+</style> -->
+
+
