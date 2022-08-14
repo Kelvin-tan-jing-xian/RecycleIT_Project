@@ -286,7 +286,7 @@ def login():
                     session["username"] = user.username
                     return redirect(url_for('viewAllUsers'))
                 else:
-                    return redirect(url_for('createRequest'))
+                    return redirect(url_for('userProfile'))
             else:
                 flash("Incorrect Username or password")
 
