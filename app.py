@@ -1,3 +1,4 @@
+import datetime
 import email
 from re import sub
 import tensorflow
@@ -123,13 +124,13 @@ class Request(db.Model):
 
 class PIN(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    time_created = db.Column(db.DateTime(
-        timezone=True), server_default=func.now())
+    expiryDate = db.Column(db.String(15))
     pin = db.Column(db.String)
     username = db.Column(db.String(15))
     email = db.Column(db.String(50))
 
-    def __init__(self, pin, username, email):
+    def __init__(self, expiryDate, pin, username, email):
+        self.expiryDate = expiryDate
         self.pin = pin
         self.username = username
         self.email = email
@@ -179,7 +180,7 @@ class RegisterForm(FlaskForm):
                                  InputRequired()], default='Ang Mo Kio Avenue 1')
     unit_number = StringField(label='Unit Number', validators=[
                               InputRequired()], default='#07-06')
-    block_number = StringField(label='Block Number', validators=[
+    block_number = StringField(label='Postal Code', validators=[
                                InputRequired()], default='205')
 
 
@@ -388,7 +389,7 @@ def createRequest():
     return render_template('createRequest.html', form=form, user=current_user)
 
 
-def sendPINEmail(pin, email):
+def sendPINEmail(pin, email, expiryDate):
     email_sender = "RecycleIT.main@gmail.com"
     email_password = "oigpybczvniwkbux"
     email_receiver = email
@@ -404,11 +405,12 @@ def sendPINEmail(pin, email):
                 <br>
                 <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
                 <p>Do use this only for the E-Wastes that you have scanned previously.</p>
+                <p>Take note that this PIN will expire on <strong>{}</strong></p>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
             </html>
-            """.format(pin)
+            """.format(pin, expiryDate)
 
     part = MIMEText(html, "html")
 
@@ -459,16 +461,19 @@ def getPIN():
         if pinExists == None:
             break
 
+    today = datetime.datetime.now().date()
+    expiryDate = today + datetime.timedelta(days=10)
+
     if current_user.is_authenticated:
         user = User.query.filter_by(email=current_user.email).first()
         has_pin = PIN.query.filter_by(email=current_user.email).first()
         if has_pin == None:
-            new_pin = PIN(pin=pin, username=user.username, email=user.email)
+            new_pin = PIN(expiryDate=expiryDate, pin=pin, username=user.username, email=user.email)
             db.session.add(new_pin)
             db.session.commit()
 
             # send pin to email
-            sendPINEmail(pin, str(user.email))
+            sendPINEmail(pin, str(user.email), expiryDate)
 
             # add items to ItemsDB and link to PIN
             addtoItemsDB(str(user.email))
@@ -488,26 +493,25 @@ def getPIN():
             has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
-                new_pin = PIN(pin=pin, username="NotRegisteredUser",
-                              email=form.email.data)
+                new_pin = PIN(expiryDate=expiryDate, pin=pin, username="NotRegisteredUser", email=email)
                 db.session.add(new_pin)
                 db.session.commit()
 
                 # send pin to email
-                email = str(form.email.data)
-                sendPINEmail(pin, email)
+                
+                sendPINEmail(pin, email, expiryDate)
                 sent = True
 
                 # add items to ItemsDB and link to PIN
                 addtoItemsDB(email)
 
-                get_pin = PIN.query.filter_by(email=form.email.data).first()
+                get_pin = PIN.query.filter_by(email=email).first()
                 return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email)
 
             else:
                 hasPIN = True
                 print("you have a PIN already!")
-                user = User.query.filter_by(email=form.email.data).first()
+                user = User.query.filter_by(email=email).first()
                 if user != None:
                     isRegistered = True
 
@@ -515,8 +519,19 @@ def getPIN():
                            hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
 
 
-@app.route("/addItemsToPIN/<email>")
-def addItemsToPIN(email):
+@app.route("/addItemsToPIN")
+def addItemsToPIN():
+
+    if current_user.is_authenticated:
+            email = current_user.email
+    else:
+        email = ""
+        if "Email" in session:
+            print("Email session found")
+            email = session["Email"]
+        if email == "":
+            return redirect("/index")
+
     addtoItemsDB(email)
     get_pin = PIN.query.filter_by(email=email).first()
     pin = get_pin.pin
@@ -536,12 +551,13 @@ def addItemsToPIN(email):
                 <br>
                 <span>You can recycle your new batch of items together with the previous batch.
                 <br>
-                Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2></span>
+                Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2>
+                and your PIN expires on {}</span>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
             </html>
-            """.format(pin)
+            """.format(pin, str(get_pin.expiryDate))
 
     part = MIMEText(html, "html")
 
@@ -583,13 +599,20 @@ def unlockBin():
 
     correct = None
 
-    if current_user.is_authenticated:
-        email = current_user.email
-    else:
-        email = request.form['email']
-
     if request.method == 'POST':
-        
+
+        if current_user.is_authenticated:
+            email = current_user.email
+        else:
+            email = request.form['email']
+            
+            sessionEmail = ""
+            if "Email" in session:
+                print("Email session found")
+                sessionEmail = session["Email"]
+            sessionEmail = email
+            session["Email"] = sessionEmail
+            
         num1 = request.form['num1']
         num2 = request.form['num2']
         num3 = request.form['num3']
@@ -612,6 +635,11 @@ def doneRecycling():
     if current_user.is_authenticated:
         email = current_user.email
         current_user.points = current_user.points + 1
+    else:
+        email = ""
+        if "Email" in session:
+            print("Email session found")
+            email = session["Email"]
 
     pin = PIN.query.filter_by(email=email).first()
     db.session.delete(pin)
@@ -660,6 +688,23 @@ def updateRequest():
         flash("Request Updated Successfully")
 
         return redirect(url_for('retrieveRequest'))
+
+
+
+
+@app.route('/request/updates', methods=['GET', 'POST'])
+@login_required
+def updateRequests():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('manageRequests'))
 
 
 @app.route('/dashboard')
@@ -734,6 +779,9 @@ def update():
         flash("User Updated Successfully")
 
         return redirect(url_for('viewAllUsers'))
+
+
+
 
 # This route is for deleting our user
 
