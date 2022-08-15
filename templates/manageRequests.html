@@ -11,7 +11,14 @@ Retrieve Request
 <br>
 <br>
 <h1>Manage All Requests</h1>
+
 <div class="container">
+
+
+    <iframe src="https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d63820.02163110194!2d103.70225771190754!3d1.3250935117151734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e3!4m5!1s0x31da05fd62d5a5f5%3A0x65c810f44d60e061!2s20%20Tuas%20Loop%2C%20Singapore%20637350!3m2!1d1.3200353999999999!2d103.6363884!4m5!1s0x31da11238a8b9375%3A0x887869cf52abf5c4!2sSingapore!3m2!1d1.352083!2d103.819836!5e0!3m2!1sen!2ssg!4v1660544246305!5m2!1sen!2ssg" width="1150" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <br>
+    <br>
+
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     {% for message in messages %}
@@ -35,7 +42,7 @@ Retrieve Request
                 <th scope="col">Email</th>
                 <th scope="col">Street Address</th>
                 <th scope="col">Unit Number</th>
-                <th scope="col">Block Number</th>
+                <th scope="col">Postal code</th>
                 <th scope="col">Item(s) to recycle</th>
 
                 <th scope="col">Action</th>
@@ -69,7 +76,7 @@ Retrieve Request
                         <!-- Delete Button that opens the modal once clicked -->
                         <button type="button" class="btn btn-danger" data-toggle="modal"
                             data-target="#modaldelete{{item.id}}">
-                            Delete
+                            Complete
                         </button>
 
                         <!-- The Modal which is taken from w3schools -->
@@ -79,19 +86,19 @@ Retrieve Request
 
                                     <!-- Modal Header -->
                                     <div class="modal-header">
-                                        <h4 class="modal-title">Delete Confirmation</h4>
+                                        <h4 class="modal-title">Complete Confirmation</h4>
                                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                                     </div>
 
                                     <!-- Modal body -->
                                     <div class="modal-body">
-                                        Are you sure you want to delete the request of {{item.items}}?
+                                        Are you sure you have completed the collection request of {{item.username}}?
                                     </div>
 
                                     <!-- Modal footer -->
                                     <div class="modal-footer">
-                                        <!--Real Delete button-->
-                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                        <!--Real Delete/complete button-->
+                                        <input type="submit" value="Complete" class="btn btn-danger">
                                         <!--                    Cancel button that dismisses the modal-->
                                         <button type="button" class="btn btn-secondary"
                                             data-dismiss="modal">Cancel</button>
@@ -116,41 +123,32 @@ Retrieve Request
                         </div>
                         <div class="modal-body">
                             <!-- <form action="{{url_for('update')}}" method="POST">  -->
-                            <form action="/user/update" method="POST">
+                            <form action="/request/updates" method="POST">
+                                <input type="hidden" name="id" value="{{item.id}}">
 
                                 <div class="form-group">
-                                    <label>Name:</label>
-                                    <input type="hidden" name="id" value="{{item.id}}">
-                                    <input type="text" class="form-control" name="username" value="{{item.username}}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Email:</label>
-                                    <input type="text" class="form-control" name="email" value="{{item.email}}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Password:</label>
-                                    <input type="text" class="form-control" name="password" readonly
-                                        value="{{item.password}}">
+                                    <label>Items to recycle:</label>
+                                    <input type="text" class="form-control" name="items" value="{{item.items}}">                                
                                 </div>
                                 <div class="form-group">
                                     <button class="btn btn-primary" type="submit">Save</button>
 
                                 </div>
 
-
+                                
                             </form>
                         </div>
                         <div class="modal-footer">
 
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
-
-
+            
+            
                     </div>
-
-
+            
+            
                 </div>
-
+            
             </div>
 
             {% endfor %}

@@ -180,7 +180,7 @@ class RegisterForm(FlaskForm):
                                  InputRequired()], default='Ang Mo Kio Avenue 1')
     unit_number = StringField(label='Unit Number', validators=[
                               InputRequired()], default='#07-06')
-    block_number = StringField(label='Block Number', validators=[
+    block_number = StringField(label='Postal Code', validators=[
                                InputRequired()], default='205')
 
 
@@ -696,6 +696,23 @@ def updateRequest():
         return redirect(url_for('retrieveRequest'))
 
 
+
+
+@app.route('/request/updates', methods=['GET', 'POST'])
+@login_required
+def updateRequests():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('manageRequests'))
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -768,6 +785,9 @@ def update():
         flash("User Updated Successfully")
 
         return redirect(url_for('viewAllUsers'))
+
+
+
 
 # This route is for deleting our user
 
