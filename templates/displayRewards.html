@@ -33,17 +33,17 @@ Display Rewards
                                         {% if point >= reward.cost %}
                                             {% if reward.email == user.email %}
                                                 <td class="text-end">
-                                                    <button type="button" class="btn btn-lg btn-primary" disabled>You own this</button>
+                                                    <button type="button" class="btn btn-secondary" disabled>You own this</button>
                                                 </td>
                                             {% else %}   
                                                     <td class="text-end">
-                                                        <button type="button" class="btn btn-lg btn-primary" ><a href="/getReward/{{ reward.id }} " style="text-decoration:none;color:white;">Get reward</a></button>
+                                                        <button type="button" class="btn btn-success" ><a href="/getReward/{{ reward.id }} " style="text-decoration:none;color:white;">Get reward</a></button>
                                                     </td>
                                                 
                                             {% endif %} 
                                         {% elif reward.cost > point %}
                                             <td class="text-end">
-                                                <button type="button" class="btn btn-lg btn-primary" disabled>Not enough points</button>
+                                                <button type="button" class="btn btn-secondary" disabled>Not enough points</button>
                                             </td>
                                         {% endif %}   
                                     </tr>
