@@ -771,13 +771,35 @@ def allRewards():
 @app.route('/displayRewards')
 def displayRewards():
     rewards_list = []
-    cost_list = []
     rewards = Rewards.query.all()
     for reward in rewards:
         rewards_list.append(reward)
     point = int(current_user.points)
     return render_template('displayRewards.html', rewards=rewards_list, user=current_user,point = point)
 
+
+@app.route('/myRewards')
+def myRewards():
+    rewards_list = []
+    rewards = Rewards.query.all()
+    email = session["email"]
+    for reward in rewards:
+        if reward.email == email:
+            rewards_list.append(reward)
+    return render_template('myRewards.html', user=current_user, rewards_list=rewards_list)
+
+def random_with_N_digits(n):
+    range_start = 10**(n-1)
+    range_end = (10**n)-1
+    return randint(range_start, range_end)
+
+@app.route('/rewardBooked/<id>/')
+def rewardBooked(id):
+    code = random_with_N_digits(6)
+    my_data = Rewards.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    return render_template('rewardBooked.html', user=current_user,code=code)
 
 @app.route('/admin/request/delete/<id>/', methods=['POST'])
 def adminDeleteRequest(id):
