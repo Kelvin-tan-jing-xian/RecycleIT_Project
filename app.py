@@ -140,14 +140,14 @@ class ItemsDB(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50))
     status = db.Column(db.String(15))
-    time_created = db.Column(db.DateTime(
-        timezone=True), server_default=func.now())
+    expiryDate = db.Column(db.String(15))
     item = db.Column(db.String(50))
     filename = db.Column(db.String)
 
-    def __init__(self, email, status, item, filename):
+    def __init__(self, email, status, expiryDate, item, filename):
         self.email = email
         self.status = status
+        self.expiryDate = expiryDate
         self.item = item
         self.filename = filename
 
@@ -403,7 +403,7 @@ def sendPINEmail(pin, email, expiryDate):
                 <br>
                 <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
                 <p>Do use this only for the E-Wastes that you have scanned previously.</p>
-                <p>Take note that this PIN will expire on <strong>{}</strong></p>
+                <p>Take note that this PIN will expire on: <strong>{}</strong></p>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
@@ -430,10 +430,13 @@ def addtoItemsDB(email):
     if "AddedItems" in session:  # checking if any session existed
         print("AddedItems session found")
         item_dict = session["AddedItems"]
+    
+    today = datetime.datetime.now().date()
+    expiryDate = today + datetime.timedelta(days=10)
 
     for i in item_dict:  # i is the filename, and item_dict[i] is the item
         if item_dict[i] != "":  # dont add non regulated ewaste
-            new_item = ItemsDB(email=email, status="NotRecycled",
+            new_item = ItemsDB(email=email, status="NotRecycled", expiryDate=expiryDate,
                                item=item_dict[i], filename=i)
             db.session.add(new_item)
             db.session.commit()
@@ -559,7 +562,7 @@ def addItemsToPIN():
                 <span>You can recycle your new batch of items together with the previous batch.
                 <br>
                 Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2>
-                and your PIN expires on {}</span>
+                and your PIN expires on: <strong>{}</strong></span>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
@@ -600,6 +603,69 @@ def addItemsToPIN():
 def itemsHistory():
     itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
     return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
+
+@app.route("/viewAllItems")
+@login_required
+def viewAllItems():
+    allItems = ItemsDB.query.all()
+    daysToExpire = []
+    for i in allItems:
+        expirydate = datetime.datetime.strptime(str(i.expiryDate), "%Y-%m-%d")
+        today = datetime.datetime.now().date()
+        today1=  datetime.datetime.strptime(str(today), "%Y-%m-%d")
+        difference = expirydate - today1
+        print("the difference is: ", difference.days)
+        daysToExpire.append(difference.days)
+
+    return render_template('viewAllItems.html', user=current_user, allItems=allItems, daysToExpire=daysToExpire)
+
+@app.route("/alertUser/<email>")
+@login_required
+def alertUser(email):
+
+    get_pin = PIN.query.filter_by(email=email).first()
+    get_items = ItemsDB.query.filter_by(email=email).all()
+
+    expirydate = datetime.datetime.strptime(str(get_pin.expiryDate), "%Y-%m-%d")
+    today = datetime.datetime.now().date()
+    today1=  datetime.datetime.strptime(str(today), "%Y-%m-%d")
+    difference = expirydate - today1
+
+    email_sender = "RecycleIT.main@gmail.com"
+    email_password = "oigpybczvniwkbux"
+    email_receiver = email
+
+    subject = "reminder to recycle your items"
+
+    # HTML Message Part
+    html = """\
+            <html>
+            <body style="font-family: 'Poppins', sans-serif;" >
+                <p>Dear customer,</p>
+                <p>You still have {} of unrecycled items!</p>
+                <br>
+                <span>You have {} days left to recycle your items before the PIN expires!
+                <br>
+                Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2>
+                and your PIN expires on: <strong>{}</strong></span>
+                <p>Thanks,</p>
+                <h2 style="color: #a4c639;">RECYCLEIT</h2>
+            </body>
+            </html>
+            """.format(len(get_items), difference.days, get_pin.pin, str(get_pin.expiryDate))
+
+    part = MIMEText(html, "html")
+
+    em = MIMEMultipart("alternative")
+    em["From"] = email_sender
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.attach(part)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+    return redirect("/viewAllItems")
 
 @app.route("/unlockBin",  methods=['GET', 'POST'])
 def unlockBin():
