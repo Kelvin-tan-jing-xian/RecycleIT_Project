@@ -551,7 +551,14 @@ def getPIN():
                 user = User.query.filter_by(email=email).first()
                 if user != None:
                     isRegistered = True
+
                 email = form.email.data
+                sessionEmail = ""
+                if "Email" in session:
+                    print("Email session found")
+                    sessionEmail = session["Email"]
+                sessionEmail = email
+                session["Email"] = sessionEmail
                 
                 if isExpired(email):
                     deleteExpiredPIN(email)
@@ -573,7 +580,7 @@ def addItemsToPIN():
             email = session["Email"]
         if email == "":
             return redirect("/index")
-
+    print("this is email: ", email)
     addtoItemsDB(email)
     get_pin = PIN.query.filter_by(email=email).first()
     pin = get_pin.pin
@@ -630,7 +637,7 @@ def addItemsToPIN():
         itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
         return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
     else:
-        return render_template("index.html")
+        return render_template("/unlockBin.html", user=current_user, correct=None, expired=None)
 
 @app.route("/deleteExpiredPIN/<email>")
 def deleteExpiredPIN(email):
@@ -649,16 +656,19 @@ def isExpired(email):
     
     get_pin = PIN.query.filter_by(email=email).first()
 
-    expirydate = datetime.datetime.strptime(str(get_pin.expiryDate), "%Y-%m-%d")
-    today = datetime.datetime.now().date()
-    today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
-    difference = expirydate - today1
+    if get_pin != None: # if none means its recycled or expired already
+        expirydate = datetime.datetime.strptime(str(get_pin.expiryDate), "%Y-%m-%d")
+        today = datetime.datetime.now().date()
+        today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
+        difference = expirydate - today1
 
-    if difference.days <= 0:
-        isExpired = True
-    else: 
+        if difference.days <= 0:
+            isExpired = True
+        else: 
+            isExpired = False
+    else:
         isExpired = False
-        
+
     return isExpired
 
 @app.route("/itemsHistory")
@@ -673,14 +683,17 @@ def itemsHistory():
 def viewAllItems():
     allItems = ItemsDB.query.all()
     daysToExpire = []
-    for i in allItems:
-        expirydate = datetime.datetime.strptime(str(i.expiryDate), "%Y-%m-%d")
-        today = datetime.datetime.now().date()
-        today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
-        difference = expirydate - today1
-        print("the difference is: ", difference.days)
-        daysToExpire.append(difference.days)
-    
+    for i in allItems:   
+        if isExpired(i.email):
+            deleteExpiredPIN(i.email)
+        else:
+            expirydate = datetime.datetime.strptime(str(i.expiryDate), "%Y-%m-%d")
+            today = datetime.datetime.now().date()
+            today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
+            difference = expirydate - today1
+            print("the difference is: ", difference.days)
+            daysToExpire.append(difference.days)
+
     return render_template('viewAllItems.html', user=current_user, allItems=allItems, daysToExpire=daysToExpire)
 
 
@@ -865,14 +878,14 @@ def dashboard():
     return render_template('dashboard.html', name=current_user.username, user=current_user)
 
 
+@app.route('/oldeducation')
+def oldeducation():
+    return render_template('old_education.html', user=current_user)
+
+
 @app.route('/education')
 def education():
     return render_template('education.html', user=current_user)
-
-
-@app.route('/types_of_ewaste')
-def types_of_ewaste():
-    return render_template('types_of_ewaste.html', user=current_user)
 
 
 @app.route("/viewAllUsers")

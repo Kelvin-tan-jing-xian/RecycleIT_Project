@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+Demo App
+{% endblock %}
+
+
+<link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}">
+<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous"></script>
+
+
+{% block content %}
+
+    <div class="container">
+
+      <div class="section-heading" style="padding-top: 10%;">
+        <h2>What is <em>E-waste</em>?</h2>
+        <span class="lead">Watch this quick video below to understand e recycling better!<br> You are making your first step in
+          creating a better world!</span>
+      </div>
+      <center>
+      <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
+        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      </center>
+
+      <div class="section-heading" style="padding-top: 10%;">
+        <span>Here is a poster on E-Waste to help you understand E-Waste better!</span>
+      </div>
+
+      <img src="/static/images/SHSSPoster.png" class="center">
+      <br>
+      <br>
+      <img src="/static/images/SHSSPoster2.png" width: 10px height: 100 class="center">
+
+
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
+      <h1> Interested to learn more? Join our forum discussion page!</h1>
+      <br>
+      <center>
+
+     <blockquote class="reddit-card" data-card-created="1490648549"><a target="_blank" href="https://www.reddit.com/r/ALBA_Ewaste/?ref=share&ref_source=embed">ALBA E-WASTE FORUM</a> from <a href="http://www.reddit.com/r/ALBA_Ewaste"></a></blockquote>
+<script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>
+     
+    </center>
+      
+    
+
+
+    
+
+
+
+    </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+
+
+
+    
+{% endblock %}
+
+<style>
+
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+  }
+  
+</style>

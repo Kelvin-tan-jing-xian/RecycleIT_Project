@@ -1,86 +1,176 @@
 {% extends "base.html" %}
 
 {% block title %}
-Demo App
+Education
 {% endblock %}
-
-
-<link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}">
-<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-  crossorigin="anonymous"></script>
-
 
 {% block content %}
 
+<div class="page-heading header-text">
     <div class="container">
-
-      <div class="section-heading" style="padding-top: 10%;">
-        <h2>What is <em>E-waste</em>?</h2>
-        <span class="lead">Watch this quick video below to understand e recycling better!<br> You are making your first step in
-          creating a better world!</span>
+      <div class="row">
+        <div class="col-md-12">
+          <h1>Education</h1>
+          <span>Not all E-Waste are recyclable!<br>Learn more here.</span>
+        </div>
       </div>
-      <center>
-      <iframe width="885" height="498" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
-        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
-      </center>
-
-      <div class="section-heading" style="padding-top: 10%;">
-        <span>Here is a poster on E-Waste to help you understand E-Waste better!</span>
-      </div>
-
-      <img src="/static/images/SHSSPoster.png" class="center">
-      <br>
-      <br>
-      <img src="/static/images/SHSSPoster2.png" width: 10px height: 100" class="center">
-
-
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-
-      <h1> Interested to learn more? Join our forum discussion page!</h1>
-      <br>
-      <center>
-
-     <blockquote class="reddit-card" data-card-created="1490648549"><a target="_blank" href="https://www.reddit.com/r/ALBA_Ewaste/?ref=share&ref_source=embed">ALBA E-WASTE FORUM</a> from <a href="http://www.reddit.com/r/ALBA_Ewaste"></a></blockquote>
-<script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>
-     
-    </center>
-      
-    
-
-
-    
-
-
-
     </div>
+</div>
 
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
+<div class="more-info about-info">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="more-info-content">
+            <div class="row">
+              <div class="col-md-6 align-self-center">
+                <div class="right-content" style="height: 340px;">
+                  <h2 style="margin-top:50px;">What is <em>E-Waste</em>?</h2>
+                  <p style="text-align: left;">E-Waste refers to electrical and electronic waste. 
+                    It contains valuable materials! Improper disposal will cause loss of valuable resources
+                    and carbon emission.
+                  <br>Watch the video on the right done by us to have a better understanding!</p>
+                </div>
+                <div class="right-content">
+                  <span>Not sure if you can recycle your E-Waste? Let us help!</span>
+                  <h2>Types of <em>E-waste</em> to recycle</h2>
+                  <p style="text-align: left;">We only accept regulated E-Waste. Non-regulated E-Waste are non-regulated under the Extended Producer Responsibility Scheme for E-Waste Management. 
+                    We recommend for you to bring your E-Waste down to the Cash for Trash (CFT) station.
+                    <br>
+                    If you are still unsure if your E-Waste is recyclable, do use our <a href="/#scanner">E-Waste scanner</a> and we will tell you if it can be recycled.
+                    <br>
+                    <br>
+                    Here is a list of regulated E-Waste:
+                    <ul>
+                        <li>Large Household Appliances</li>
+                        <li>Electric Mobility Devices</li>
+                        <li>House Hold Batteries</li>
+                        <li>Lithium Ion Portable Batteries</li>
+                        <li>Consumer Electirc Vehical Batteries</li>
+                        <li>Consumer Lamp</li>
+                        <li>ICT Equipment</li>
+                    </ul>
+                  <br>Find out more on the ALBA E-Waste website! 
+                  <a target="_blank" href="https://alba-ewaste.sg/types-e-waste/" class="filled-button" style="margin-left:10px;">Read More</a></p>
+                </div>
+              </div>
+              <div class="left-image">
+                <div class="col-md-6">
+                  <iframe width="100%" height="315" src="https://www.youtube.com/embed/qu8tAALNu8w" title="E-Waste Educational Video"
+                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="left-image" style="margin-top: 100px;">
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="container" style="height:100%; width:100%;">
+                        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                          <!-- Indicators -->
+                          <ol class="carousel-indicators">
+                            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                            <li data-target="#myCarousel" data-slide-to="1"></li>
+                            <li data-target="#myCarousel" data-slide-to="2"></li>
+                            <li data-target="#myCarousel" data-slide-to="3"></li>
+                            <li data-target="#myCarousel" data-slide-to="4"></li>
+                            <li data-target="#myCarousel" data-slide-to="5"></li>
+                            <li data-target="#myCarousel" data-slide-to="6"></li>
+                          </ol>
+                      
+                          <!-- Wrapper for slides -->
+                          <div class="carousel-inner">
+                      
+                            <div class="item active">
+                              <img src="../static/images/household_appliance.jpg" style="height:300px;">
+                              <div class="carousel-caption">
+                                <h4>Large Household Appliances</h4>
+                              </div>
+                            </div>
+                      
+                            <div class="item">
+                              <img src="../static/images/emd.jpg" style="height:300px">
+                              <div class="carousel-caption">
+                                <h4>Electric Mobility Devices</h4>
+                              </div>
+                            </div>
+                          
+                            <div class="item">
+                              <img src="../static/images/householdbatteries.jpg" style="height:300px;">
+                              <div class="carousel-caption">
+                                <h4>House Hold Batteries</h4>
+                              </div>
+                            </div>
+
+                            <div class="item">
+                                <img src="../static/images/powerbank.jpg" style="height:300px;">
+                                <div class="carousel-caption">
+                                  <h4>Lithium Ion Portable Batteries</h4>
+                                </div>
+                            </div>
+
+                            <div class="item">
+                                <img src="../static/images/car_battery.jpg" style="height:300px;">
+                                <div class="carousel-caption">
+                                  <h4>Consumer Electirc Vehical Batteries</h4>
+                                </div>
+                            </div>
+
+                            <div class="item">
+                                <img src="../static/images/light_bulb.jpg" style="height:300px;">
+                                <div class="carousel-caption">
+                                  <h4>Consumer Lamp</h4>
+                                </div>
+                            </div>
+                            
+                            <div class="item">
+                                <img src="../static/images/ICT.jpg" style="height:300px;">
+                                <div class="carousel-caption">
+                                  <h4>ICT Equipment</h4>
+                                </div>
+                            </div>
+                          </div>
+                      
+                          <!-- Left and right controls -->
+                          <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                            <span class="sr-only">Previous</span>
+                          </a>
+                          <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                            <span class="sr-only">Next</span>
+                          </a>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <br>
+            <br>
+            <p style="font-size:20px;">CHECK OUT THESE POSTERS DONE BY US FOR MORE INFORMATION!</p>
+            <br>
+          </div>
+          <div class="col-md-6">
+            <img src="/static/images/SHSSPoster.png" width="100%" height="1300px">
+          </div>
+          <div class="col-md-6">
+            <img src="/static/images/SHSSPoster2.png" width="100%" height="1300px">
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<br>
+<br>
+<br>
 
 
-
-
-    
 {% endblock %}
-
-<style>
-
-  .center {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-  }
-  
-</style>
