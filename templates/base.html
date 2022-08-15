@@ -10,9 +10,8 @@
         <link rel="stylesheet" href="{{url_for('.static', filename='/css/fileUpload.css')}}"> 
         <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+        
        <!-- Bootstrap core CSS -->
         <!-- <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
 
@@ -51,11 +50,12 @@
               <a class="navbar-brand" href="/" style="text-decoration:none;"><h2>RecycleIT</h2></a>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                   <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#scanner" style="text-decoration:none;">Scanner</a></li>
                     <li><a href="/createRequest" style="text-decoration:none;">Doorstep collection</a></li>
-                    <li><a href="/" style="text-decoration:none;">Take picture</a></li>
                     <li><a href="/education" style="text-decoration:none;">Education</a></li>
                     <li><a href="/types_of_ewaste" style="text-decoration:none;">Types of E-Waste</a></li>
-                    <li><a href="/displayRewards" style="text-decoration:none;"> Available Rewards</a></li>
+                    <li><a href="/displayRewards" style="text-decoration:none;">Rewards</a></li>
+                    <li><a href="/unlockBin" style="text-decoration:none;">Unlock Bin</a></li>
                     <li><a href="/userProfile" style="text-decoration:none;">Profile</a></li>
                     <li><a href="{{ url_for('logout') }}" style="text-decoration:none;">Log Out</a></li>
                   </ul>
@@ -70,6 +70,7 @@
                           <li><a href="/" style="text-decoration:none;">Home</a></li>
                           <li><a href="/education" style="text-decoration:none;">Education</a></li>
                           <li><a href="/types_of_ewaste" style="text-decoration:none;">Types of E-Waste</a></li>
+                          <li><a href="/unlockBin" style="text-decoration:none;">Unlock Bin</a></li>
                           <li><a href="{{ url_for('login') }}" style="text-decoration:none;">Login</a></li>
                           <li><a href="{{ url_for('signup') }}" style="text-decoration:none;">Sign Up</a></li>
                       </ul>
