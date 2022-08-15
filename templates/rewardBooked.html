@@ -7,19 +7,11 @@ Reward Redeemed
 
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="section-title">
-                <h2 class="wow fadeInUp" data-wow-delay=".4s">
-                    Success page
-                </h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-5 col-md-12 col-12 wow fadeInUp" data-wow-delay=".4s">
-        Use this code : {{code}}
-        <a class="btn btn-priamry" href="/myRewards">Back</a>
-    </div>
+
+<div class="getPIN">
+    <h3>Success page</h3>
+    <p> Use this code : {{code}}</p>
+    <a class="btn btn-priamry" href="/myRewards" style="text-decoration:none;">Back</a>
 </div>
+   
 {% endblock %}

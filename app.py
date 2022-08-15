@@ -90,7 +90,7 @@ class Rewards(db.Model):
     cost = db.Column(db.Integer)
 
 
-    def __init__(self, username, email, description, cost,name):
+    def __init__(self, username, email, name, description, cost):
         self.username = username
         self.email = email
         self.name = name
@@ -286,7 +286,9 @@ def login():
                     session["username"] = user.username
                     return redirect(url_for('viewAllUsers'))
                 else:
-                    return redirect(url_for('userProfile'))
+                    session["email"] = user.email
+                    session["username"] = user.username
+                    return redirect(url_for('consumerUpdateUser'))
             else:
                 flash("Incorrect Username or password")
 
@@ -609,6 +611,7 @@ def unlockBin():
 def doneRecycling():
     if current_user.is_authenticated:
         email = current_user.email
+        current_user.points = current_user.points + 1
 
     pin = PIN.query.filter_by(email=email).first()
     db.session.delete(pin)
@@ -786,7 +789,7 @@ def deleteReward(id):
     return redirect(url_for('allRewards'))
 
 
-@app.route('/getReward/<id>/', methods=['POST'])
+@app.route('/getReward/<id>/')
 def getReward(id):
     reward = Rewards.query.get(id)
     reward.username = session["username"]
@@ -796,10 +799,8 @@ def getReward(id):
     point = point - cost 
     if (point < 0):
         point = 0
-    user = User.query.get(session["username"])
-    user.points = point
+    current_user.points = point
     db.session.commit()
-
     return redirect(url_for('displayRewards'))
 
 
