@@ -401,10 +401,12 @@ def createRequest():
 
 def sendPINEmail(pin, email, expiryDate):
 
-    # if main exceed quota, use "RecycleIT.side@gmail.com"
-    # pw: "ugnjnyqqrwsuirhn"
-    email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux" 
+    # quota exceed for:
+    # email_sender = "RecycleIT.main@gmail.com"
+    # email_password = "oigpybczvniwkbux"
+
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
     email_receiver = email
 
     subject = "Your PIN to recycle the E-waste"
@@ -558,8 +560,8 @@ def addItemsToPIN():
     # email_sender = "RecycleIT.main@gmail.com"
     # email_password = "oigpybczvniwkbux"
 
-    email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux"
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
     email_receiver = email
 
     subject = "Your items to recycle has been updated"
@@ -650,8 +652,8 @@ def alertUser(email):
     # email_sender = "RecycleIT.main@gmail.com"
     # email_password = "oigpybczvniwkbux"
 
-    email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux"
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
     email_receiver = email
 
     subject = "reminder to recycle your items"
