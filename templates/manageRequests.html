@@ -10,7 +10,7 @@ Retrieve Request
 <br>
 <br>
 <br>
-<h1>Manage All Requests</h1>
+<h1>Manage Doorstep Collection Requests</h1>
 
 <div class="container">
 
@@ -44,6 +44,7 @@ Retrieve Request
                 <th scope="col">Unit Number</th>
                 <th scope="col">Postal code</th>
                 <th scope="col">Item(s) to recycle</th>
+                <th scope="col">Recommended no. of helpers</th>
 
                 <th scope="col">Action</th>
 
@@ -62,6 +63,13 @@ Retrieve Request
                 <td>{{item.unit_number}}</td>
                 <td>{{item.block_number}}</td>
                 <td>{{item.items}}</td>
+                {% if item.items|length > 25 %}
+	            <td>3</td>
+                {% elif item.items|length > 15 %}
+	            <td>2</td>
+                {% else %}
+	            <td>1</td>
+                {% endif %}
 
 
 
