@@ -1,35 +1,37 @@
 {% extends "base.html" %}
 
 {% block title %}
-Items History
+ManageItems
 {% endblock %}
-
 
 
 {% block content %}
 
-<div class="itemsHistory">
-    <h3>Your items history</h3>
-    {% if itemsHistory == [] %}
+<div class="viewAllItems">
+    <h3>All Items</h3>
+    {% if allItems == [] %}
         <img src="../static/images/sadPic.png" style="width: 15%; margin-left:42.5%;">
         <br>
         <br>
-        <p>You do not have any items.</p>
-        <p>Use our E-Waste scanner and recycle now!</p>
+        <p>Nobody recycled yet.</p>
     {% else %}
         <table class="table table-hover table-nowrap">
             <thead>
                 <tr>
-                <th scope="col">Image</th>
-                <th scope="col">Item</th>
-                <th scope="col">Status</th>
-                <th scope="col">Points</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">User email</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Expiry Date</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                {% for i in itemsHistory %}
+                {% set index = 0 %}
+                {% for i in allItems %}
                     <tr>
                         <td><img width="100" height="100" src="{{ url_for('display_image', filename=i.filename)}}"></td>
+                        <td>{{ i.email }}</td>
                         <td>{{ i.item }}</td>
                         {% if i.status == "NotRecycled" %}
                             <td style="color:rgb(186, 23, 23)"><strong>Not Recycled</strong></td>
@@ -38,7 +40,13 @@ Items History
                         {% elif i.status == "Expired" %}
                             <td><strong>Expired</strong></td>
                         {% endif %}
-                        <td></td>
+                        <td>{{ i.expiryDate }}</td>
+                        {% if daysToExpire[index] < 5 %}
+                            <td><a href="{{url_for('alertUser', email=i.email)}}" class="filled-button" style="padding: 6px 15px; margin-left:10px;">Alert User</a></p></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        {% set index = index + 1 %}
                     </tr>
                 {% endfor %}
             </tbody>
