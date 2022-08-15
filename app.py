@@ -91,7 +91,7 @@ class Rewards(db.Model):
     cost = db.Column(db.Integer)
 
 
-    def __init__(self, username, email, description, cost,name):
+    def __init__(self, username, email, name, description, cost):
         self.username = username
         self.email = email
         self.name = name
@@ -180,7 +180,7 @@ class RegisterForm(FlaskForm):
                                  InputRequired()], default='Ang Mo Kio Avenue 1')
     unit_number = StringField(label='Unit Number', validators=[
                               InputRequired()], default='#07-06')
-    block_number = StringField(label='Block Number', validators=[
+    block_number = StringField(label='Postal Code', validators=[
                                InputRequired()], default='205')
 
 
@@ -287,7 +287,9 @@ def login():
                     session["username"] = user.username
                     return redirect(url_for('viewAllUsers'))
                 else:
-                    return redirect("/userProfile")
+                    session["email"] = user.email
+                    session["username"] = user.username
+                    return redirect(url_for('consumerUpdateUser'))
             else:
                 flash("Incorrect Username or password")
 
@@ -490,17 +492,8 @@ def getPIN():
         hasPIN = False
         isRegistered = False
         if request.method == "POST":  # for user not logged in
-            email = str(form.email.data)
 
-            sessionEmail = ""
-            if "Email" in session:
-                print("Email session found")
-                sessionEmail = session["Email"]
-
-            sessionEmail = email
-            session["Email"] = sessionEmail
-
-            has_pin = PIN.query.filter_by(email=email).first()
+            has_pin = PIN.query.filter_by(email=form.email.data).first()
             print("this is has pin", has_pin)
             if has_pin == None:
                 new_pin = PIN(expiryDate=expiryDate, pin=pin, username="NotRegisteredUser", email=email)
@@ -707,6 +700,7 @@ def unlockBin():
 def doneRecycling():
     if current_user.is_authenticated:
         email = current_user.email
+        current_user.points = current_user.points + 1
     else:
         email = ""
         if "Email" in session:
@@ -760,6 +754,23 @@ def updateRequest():
         flash("Request Updated Successfully")
 
         return redirect(url_for('retrieveRequest'))
+
+
+
+
+@app.route('/request/updates', methods=['GET', 'POST'])
+@login_required
+def updateRequests():
+
+    if request.method == 'POST':
+        my_data = Request.query.get(request.form.get('id'))
+
+        my_data.items = request.form['items']
+
+        db.session.commit()
+        flash("Request Updated Successfully")
+
+        return redirect(url_for('manageRequests'))
 
 
 @app.route('/dashboard')
@@ -835,6 +846,9 @@ def update():
 
         return redirect(url_for('viewAllUsers'))
 
+
+
+
 # This route is for deleting our user
 
 
@@ -889,7 +903,7 @@ def deleteReward(id):
     return redirect(url_for('allRewards'))
 
 
-@app.route('/getReward/<id>/', methods=['POST'])
+@app.route('/getReward/<id>/')
 def getReward(id):
     reward = Rewards.query.get(id)
     reward.username = session["username"]
@@ -899,10 +913,8 @@ def getReward(id):
     point = point - cost 
     if (point < 0):
         point = 0
-    user = User.query.get(session["username"])
-    user.points = point
+    current_user.points = point
     db.session.commit()
-
     return redirect(url_for('displayRewards'))
 
 

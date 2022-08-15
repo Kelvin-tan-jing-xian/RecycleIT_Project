@@ -12,7 +12,7 @@ Display Rewards
 <div class="p-10 bg-surface-secondary dashboard">
     <div class="container mt-3">
         <div class="card">
-                <h1>Available Rewards</h6>
+                <h1>Available Rewards<br><p>You have {{point}} points</p></h1>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-nowrap">
@@ -28,12 +28,19 @@ Display Rewards
                         {% for reward in rewards %}
                                     <tr>
                                         <td><span>{{ reward.name }}</span></td>
-                                        <td><span>{{ reward.cost }}</span></td>
-                                        <td><span>{{ reward.description }} </span></td>
-                                        {% if point > reward.cost %}
-                                            <td class="text-end">
-                                            <a href="/getReward/{{ reward.id }}" class="btn btn-primary">Get reward</a>
-                                            </td>
+                                        <td><span>{{ reward.description }}</span></td>
+                                        <td><span>{{ reward.cost }} </span></td>
+                                        {% if point >= reward.cost %}
+                                            {% if reward.email == user.email %}
+                                                <td class="text-end">
+                                                    <button type="button" class="btn btn-lg btn-primary" disabled>You own this</button>
+                                                </td>
+                                            {% else %}   
+                                                    <td class="text-end">
+                                                        <button type="button" class="btn btn-lg btn-primary" ><a href="/getReward/{{ reward.id }} " style="text-decoration:none;color:white;">Get reward</a></button>
+                                                    </td>
+                                                
+                                            {% endif %} 
                                         {% elif reward.cost > point %}
                                             <td class="text-end">
                                                 <button type="button" class="btn btn-lg btn-primary" disabled>Not enough points</button>
