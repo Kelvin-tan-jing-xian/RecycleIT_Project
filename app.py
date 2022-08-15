@@ -631,7 +631,8 @@ def viewAllItems():
         difference = expirydate - today1
         print("the difference is: ", difference.days)
         daysToExpire.append(difference.days)
-
+        print("daystoexpire is: ", daysToExpire)
+    
     return render_template('viewAllItems.html', user=current_user, allItems=allItems, daysToExpire=daysToExpire)
 
 

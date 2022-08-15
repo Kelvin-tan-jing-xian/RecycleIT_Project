@@ -27,26 +27,24 @@ ManageItems
                 </tr>
             </thead>
             <tbody>
-                {% set index = 0 %}
-                {% for i in allItems %}
+                {% for i in range(allItems|length) %}
                     <tr>
-                        <td><img width="100" height="100" src="{{ url_for('display_image', filename=i.filename)}}"></td>
-                        <td>{{ i.email }}</td>
-                        <td>{{ i.item }}</td>
-                        {% if i.status == "NotRecycled" %}
+                        <td><img width="100" height="100" src="{{ url_for('display_image', filename=allItems[i].filename)}}"></td>
+                        <td>{{ allItems[i].email }}</td>
+                        <td>{{ allItems[i].item }}</td>
+                        {% if allItems[i].status == "NotRecycled" %}
                             <td style="color:rgb(186, 23, 23)"><strong>Not Recycled</strong></td>
-                        {% elif i.status == "Recycled" %}
+                        {% elif allItems[i].status == "Recycled" %}
                             <td style="color:#a4c639;"><strong>Recycled</strong></td>
-                        {% elif i.status == "Expired" %}
+                        {% elif allItems[i].status == "Expired" %}
                             <td><strong>Expired</strong></td>
                         {% endif %}
-                        <td>{{ i.expiryDate }}</td>
-                        {% if daysToExpire[index] < 5 %}
+                        <td>{{ allItems[i].expiryDate }}</td>
+                        {% if allItems[i].status == "NotRecycled" and daysToExpire[i] < 5 %}
                             <td><a href="{{url_for('alertUser', email=i.email)}}" class="filled-button" style="padding: 6px 15px; margin-left:10px;">Alert User</a></p></td>
                         {% else %}
                             <td></td>
                         {% endif %}
-                        {% set index = index + 1 %}
                     </tr>
                 {% endfor %}
             </tbody>
