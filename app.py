@@ -70,7 +70,7 @@ class User(UserMixin, db.Model):
     requests = db.relationship('Request', backref='user')
     points = db.Column(db.Integer)
 
-    def __init__(self, username, email, password, role, street_address, unit_number, block_number,points):
+    def __init__(self, username, email, password, role, street_address, unit_number, block_number, points):
 
         self.username = username
         self.email = email
@@ -80,7 +80,7 @@ class User(UserMixin, db.Model):
         self.unit_number = unit_number
         self.block_number = block_number
         self.points = points
-     
+
 
 class Rewards(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,7 +89,6 @@ class Rewards(db.Model):
     name = db.Column(db.String(50))
     description = db.Column(db.String(100))
     cost = db.Column(db.Integer)
-
 
     def __init__(self, username, email, name, description, cost):
         self.username = username
@@ -140,14 +139,14 @@ class ItemsDB(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50))
     status = db.Column(db.String(15))
-    time_created = db.Column(db.DateTime(
-        timezone=True), server_default=func.now())
+    expiryDate = db.Column(db.String(15))
     item = db.Column(db.String(50))
     filename = db.Column(db.String)
 
-    def __init__(self, email, status, item, filename):
+    def __init__(self, email, status, expiryDate, item, filename):
         self.email = email
         self.status = status
+        self.expiryDate = expiryDate
         self.item = item
         self.filename = filename
 
@@ -186,10 +185,12 @@ class RegisterForm(FlaskForm):
 
 class createReward(FlaskForm):
     name = StringField(label='Name', validators=[
-                           InputRequired(), Length(max=50)])
-    description = StringField(label='Description', validators=[InputRequired(), Length(max=50)])
+        InputRequired(), Length(max=50)])
+    description = StringField(label='Description', validators=[
+                              InputRequired(), Length(max=50)])
     cost = RadioField(label='Cost',  choices=[
                       ('1', '1 point'), ('2', '2 points'), ('3', '3 points')], default='1')
+
 
 class RequestForm(FlaskForm):
     lamp = BooleanField(label='Household Lamp', validators=[Optional()])
@@ -242,16 +243,25 @@ def index():
         hashed_password = generate_password_hash(
             "admin123", method='sha256')
         admin = User(username="admin123",
-                        email="admin123@gmail.com",
-                        password=hashed_password,
-                        role="admin",
-                        street_address="none",
-                        unit_number="none",
-                        block_number="none",
-                        points="none"
-                        )
+                     email="admin123@gmail.com",
+                     password=hashed_password,
+                     role="admin",
+                     street_address="none",
+                     unit_number="none",
+                     block_number="none",
+                     points="none"
+                     )
         db.session.add(admin)
-        db.session.commit()
+
+    if (ItemsDB.query.first() == None):
+        new_item = ItemsDB(email="wongchekhei.11810@gmail.com", status="NotRecycled",
+                           expiryDate="2022-08-19", item="mobile phone", filename="phone.jpg")
+        db.session.add(new_item)
+        new_pin = PIN(expiryDate="2022-08-19", pin="1225",
+                      username="NotRegisteredUser", email="wongchekhei.11810@gmail.com")
+        db.session.add(new_pin)
+
+    db.session.commit()
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
 
@@ -390,8 +400,13 @@ def createRequest():
 
 
 def sendPINEmail(pin, email, expiryDate):
-    email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux"
+
+    # quota exceed for:
+    # email_sender = "RecycleIT.main@gmail.com"
+    # email_password = "oigpybczvniwkbux"
+
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
     email_receiver = email
 
     subject = "Your PIN to recycle the E-waste"
@@ -405,7 +420,7 @@ def sendPINEmail(pin, email, expiryDate):
                 <br>
                 <span>Your PIN to access our bins is: <h2 style="color: #a4c639;">{}</h2></span>
                 <p>Do use this only for the E-Wastes that you have scanned previously.</p>
-                <p>Take note that this PIN will expire on <strong>{}</strong></p>
+                <p>Take note that this PIN will expire on: <strong>{}</strong></p>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
@@ -433,9 +448,12 @@ def addtoItemsDB(email):
         print("AddedItems session found")
         item_dict = session["AddedItems"]
 
+    today = datetime.datetime.now().date()
+    expiryDate = today + datetime.timedelta(days=10)
+
     for i in item_dict:  # i is the filename, and item_dict[i] is the item
         if item_dict[i] != "":  # dont add non regulated ewaste
-            new_item = ItemsDB(email=email, status="NotRecycled",
+            new_item = ItemsDB(email=email, status="NotRecycled", expiryDate=expiryDate,
                                item=item_dict[i], filename=i)
             db.session.add(new_item)
             db.session.commit()
@@ -468,7 +486,8 @@ def getPIN():
         user = User.query.filter_by(email=current_user.email).first()
         has_pin = PIN.query.filter_by(email=current_user.email).first()
         if has_pin == None:
-            new_pin = PIN(expiryDate=expiryDate, pin=pin, username=user.username, email=user.email)
+            new_pin = PIN(expiryDate=str(expiryDate), pin=pin,
+                          username=user.username, email=user.email)
             db.session.add(new_pin)
             db.session.commit()
 
@@ -489,16 +508,17 @@ def getPIN():
         hasPIN = False
         isRegistered = False
         if request.method == "POST":  # for user not logged in
-
-            has_pin = PIN.query.filter_by(email=form.email.data).first()
+            email = form.email.data
+            has_pin = PIN.query.filter_by(email=email).first()
             print("this is has pin", has_pin)
             if has_pin == None:
-                new_pin = PIN(expiryDate=expiryDate, pin=pin, username="NotRegisteredUser", email=email)
+                new_pin = PIN(expiryDate=str(expiryDate), pin=pin,
+                              username="NotRegisteredUser", email=email)
                 db.session.add(new_pin)
                 db.session.commit()
 
                 # send pin to email
-                
+
                 sendPINEmail(pin, email, expiryDate)
                 sent = True
 
@@ -523,7 +543,7 @@ def getPIN():
 def addItemsToPIN():
 
     if current_user.is_authenticated:
-            email = current_user.email
+        email = current_user.email
     else:
         email = ""
         if "Email" in session:
@@ -536,8 +556,12 @@ def addItemsToPIN():
     get_pin = PIN.query.filter_by(email=email).first()
     pin = get_pin.pin
 
-    email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux"
+    # quota exceed for:
+    # email_sender = "RecycleIT.main@gmail.com"
+    # email_password = "oigpybczvniwkbux"
+
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
     email_receiver = email
 
     subject = "Your items to recycle has been updated"
@@ -552,7 +576,7 @@ def addItemsToPIN():
                 <span>You can recycle your new batch of items together with the previous batch.
                 <br>
                 Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2>
-                and your PIN expires on {}</span>
+                and your PIN expires on: <strong>{}</strong></span>
                 <p>Thanks,</p>
                 <h2 style="color: #a4c639;">RECYCLEIT</h2>
             </body>
@@ -594,6 +618,78 @@ def itemsHistory():
     itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
     return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
 
+
+@app.route("/viewAllItems")
+@login_required
+def viewAllItems():
+    allItems = ItemsDB.query.all()
+    daysToExpire = []
+    for i in allItems:
+        expirydate = datetime.datetime.strptime(str(i.expiryDate), "%Y-%m-%d")
+        today = datetime.datetime.now().date()
+        today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
+        difference = expirydate - today1
+        print("the difference is: ", difference.days)
+        daysToExpire.append(difference.days)
+        print("daystoexpire is: ", daysToExpire)
+    
+    return render_template('viewAllItems.html', user=current_user, allItems=allItems, daysToExpire=daysToExpire)
+
+
+@app.route("/alertUser/<email>")
+@login_required
+def alertUser(email):
+
+    get_pin = PIN.query.filter_by(email=email).first()
+    get_items = ItemsDB.query.filter_by(email=email).all()
+
+    expirydate = datetime.datetime.strptime(
+        str(get_pin.expiryDate), "%Y-%m-%d")
+    today = datetime.datetime.now().date()
+    today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
+    difference = expirydate - today1
+
+    # quota exceed for:
+    # email_sender = "RecycleIT.main@gmail.com"
+    # email_password = "oigpybczvniwkbux"
+
+    email_sender = "RecycleIT.side@gmail.com"
+    email_password = "ugnjnyqqrwsuirhn"
+    email_receiver = email
+
+    subject = "reminder to recycle your items"
+
+    # HTML Message Part
+    html = """\
+            <html>
+            <body style="font-family: 'Poppins', sans-serif;" >
+                <p>Dear customer,</p>
+                <p>You still have {} of unrecycled items!</p>
+                <br>
+                <span>You have {} days left to recycle your items before the PIN expires!
+                <br>
+                Do note that your PIN still remains the same: <h2 style="color: #a4c639;">{}</h2>
+                and your PIN expires on: <strong>{}</strong></span>
+                <p>Thanks,</p>
+                <h2 style="color: #a4c639;">RECYCLEIT</h2>
+            </body>
+            </html>
+            """.format(len(get_items), difference.days, get_pin.pin, str(get_pin.expiryDate))
+
+    part = MIMEText(html, "html")
+
+    em = MIMEMultipart("alternative")
+    em["From"] = email_sender
+    em["To"] = email_receiver
+    em["Subject"] = subject
+    em.attach(part)
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context()) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.sendmail(email_sender, email_receiver, em.as_string())
+    return redirect("/viewAllItems")
+
+
 @app.route("/unlockBin",  methods=['GET', 'POST'])
 def unlockBin():
 
@@ -605,14 +701,14 @@ def unlockBin():
             email = current_user.email
         else:
             email = request.form['email']
-            
+
             sessionEmail = ""
             if "Email" in session:
                 print("Email session found")
                 sessionEmail = session["Email"]
             sessionEmail = email
             session["Email"] = sessionEmail
-            
+
         num1 = request.form['num1']
         num2 = request.form['num2']
         num3 = request.form['num3']
@@ -629,6 +725,7 @@ def unlockBin():
         else:
             correct = False
     return render_template('unlockBin.html', user=current_user, correct=correct)
+
 
 @app.route("/doneRecycling")
 def doneRecycling():
@@ -652,6 +749,7 @@ def doneRecycling():
     db.session.commit()
 
     return render_template('thankyou.html', user=current_user)
+
 
 @app.route("/retrieveRequest")
 @login_required
@@ -688,8 +786,6 @@ def updateRequest():
         flash("Request Updated Successfully")
 
         return redirect(url_for('retrieveRequest'))
-
-
 
 
 @app.route('/request/updates', methods=['GET', 'POST'])
@@ -733,13 +829,14 @@ def viewAllUsers():
 @login_required
 def consumerUpdateUser():
 
-    itemsHistory = ItemsDB.query.filter_by(email=current_user.email, status="NotRecycled").all()
+    itemsHistory = ItemsDB.query.filter_by(
+        email=current_user.email, status="NotRecycled").all()
     first2item = []
     length = 0
 
     for i in itemsHistory:
         length += 1
-        if len(first2item) <= 1 :
+        if len(first2item) <= 1:
             first2item.append(i)
 
     if request.method == 'POST':
@@ -756,7 +853,8 @@ def consumerUpdateUser():
         # values=
         return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)
 
-    return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)  # values=
+    # values=
+    return render_template("userProfile.html", user=current_user, itemsHistory=first2item, length=length)
 
 
 @app.route("/manageRequests")
@@ -779,8 +877,6 @@ def update():
         flash("User Updated Successfully")
 
         return redirect(url_for('viewAllUsers'))
-
-
 
 
 # This route is for deleting our user
@@ -814,11 +910,11 @@ def creatingRewards():
         print("3")
         print(form.description.data)
         new_reward = Rewards(
-                        username="",
-                        email="",
-                        name =form.name.data,
-                        description=form.description.data,
-                        cost=form.cost.data
+            username="",
+            email="",
+            name=form.name.data,
+            description=form.description.data,
+            cost=form.cost.data
         )
         db.session.add(new_reward)
         db.session.commit()
@@ -826,6 +922,7 @@ def creatingRewards():
         return redirect(url_for('allRewards'))
     print("2")
     return render_template('creatingRewards.html', form=form, user=current_user)
+
 
 @app.route('/deleteRewards/<id>/')
 def deleteReward(id):
@@ -844,13 +941,12 @@ def getReward(id):
     reward.email = session["email"]
     point = current_user.points
     cost = reward.cost
-    point = point - cost 
+    point = point - cost
     if (point < 0):
         point = 0
     current_user.points = point
     db.session.commit()
     return redirect(url_for('displayRewards'))
-
 
 
 @app.route('/allRewards')
@@ -869,7 +965,7 @@ def displayRewards():
     for reward in rewards:
         rewards_list.append(reward)
     point = int(current_user.points)
-    return render_template('displayRewards.html', rewards=rewards_list, user=current_user,point = point)
+    return render_template('displayRewards.html', rewards=rewards_list, user=current_user, point=point)
 
 
 @app.route('/myRewards')
@@ -882,10 +978,12 @@ def myRewards():
             rewards_list.append(reward)
     return render_template('myRewards.html', user=current_user, rewards_list=rewards_list)
 
+
 def random_with_N_digits(n):
     range_start = 10**(n-1)
     range_end = (10**n)-1
     return randint(range_start, range_end)
+
 
 @app.route('/rewardBooked/<id>/')
 def rewardBooked(id):
@@ -893,7 +991,8 @@ def rewardBooked(id):
     my_data = Rewards.query.get(id)
     db.session.delete(my_data)
     db.session.commit()
-    return render_template('rewardBooked.html', user=current_user,code=code)
+    return render_template('rewardBooked.html', user=current_user, code=code)
+
 
 @app.route('/admin/request/delete/<id>/', methods=['POST'])
 def adminDeleteRequest(id):

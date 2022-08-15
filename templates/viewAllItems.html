@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+ManageItems
+{% endblock %}
+
+
+{% block content %}
+
+<div class="viewAllItems">
+    <h3>All Items</h3>
+    {% if allItems == [] %}
+        <img src="../static/images/sadPic.png" style="width: 15%; margin-left:42.5%;">
+        <br>
+        <br>
+        <p>Nobody recycled yet.</p>
+    {% else %}
+        <table class="table table-hover table-nowrap">
+            <thead>
+                <tr>
+                    <th scope="col">Image</th>
+                    <th scope="col">User email</th>
+                    <th scope="col">Item</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Expiry Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(allItems|length) %}
+                    <tr>
+                        <td><img width="100" height="100" src="{{ url_for('display_image', filename=allItems[i].filename)}}"></td>
+                        <td>{{ allItems[i].email }}</td>
+                        <td>{{ allItems[i].item }}</td>
+                        {% if allItems[i].status == "NotRecycled" %}
+                            <td style="color:rgb(186, 23, 23)"><strong>Not Recycled</strong></td>
+                        {% elif allItems[i].status == "Recycled" %}
+                            <td style="color:#a4c639;"><strong>Recycled</strong></td>
+                        {% elif allItems[i].status == "Expired" %}
+                            <td><strong>Expired</strong></td>
+                        {% endif %}
+                        <td>{{ allItems[i].expiryDate }}</td>
+                        {% if allItems[i].status == "NotRecycled" and daysToExpire[i] < 5 %}
+                            <td><a href="{{url_for('alertUser', email=i.email)}}" class="filled-button" style="padding: 6px 15px; margin-left:10px;">Alert User</a></p></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+{% endblock %}
