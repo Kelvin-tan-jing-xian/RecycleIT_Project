@@ -251,7 +251,14 @@ def index():
                         points="none"
                         )
         db.session.add(admin)
-        db.session.commit()
+
+    if (ItemsDB.query.first() == None):
+        new_item = ItemsDB(email="wongchekhei.11810@gmail.com", status="NotRecycled", expiryDate="2022-08-19",item="mobile phone", filename="phone.jpg")
+        db.session.add(new_item)
+        new_pin = PIN(expiryDate="2022-08-19", pin="1225", username="NotRegisteredUser", email="wongchekhei.11810@gmail.com")
+        db.session.add(new_pin)
+        
+    db.session.commit()
 
     return render_template('index.html', user=current_user, item_dict=item_dict)
 
@@ -390,8 +397,11 @@ def createRequest():
 
 
 def sendPINEmail(pin, email, expiryDate):
+
+    # if main exceed quota, use "RecycleIT.side@gmail.com"
+    # pw: "ugnjnyqqrwsuirhn"
     email_sender = "RecycleIT.main@gmail.com"
-    email_password = "oigpybczvniwkbux"
+    email_password = "oigpybczvniwkbux" 
     email_receiver = email
 
     subject = "Your PIN to recycle the E-waste"
@@ -471,7 +481,7 @@ def getPIN():
         user = User.query.filter_by(email=current_user.email).first()
         has_pin = PIN.query.filter_by(email=current_user.email).first()
         if has_pin == None:
-            new_pin = PIN(expiryDate=expiryDate, pin=pin, username=user.username, email=user.email)
+            new_pin = PIN(expiryDate=str(expiryDate), pin=pin, username=user.username, email=user.email)
             db.session.add(new_pin)
             db.session.commit()
 
@@ -492,11 +502,11 @@ def getPIN():
         hasPIN = False
         isRegistered = False
         if request.method == "POST":  # for user not logged in
-
-            has_pin = PIN.query.filter_by(email=form.email.data).first()
+            email = form.email.data
+            has_pin = PIN.query.filter_by(email=email).first()
             print("this is has pin", has_pin)
             if has_pin == None:
-                new_pin = PIN(expiryDate=expiryDate, pin=pin, username="NotRegisteredUser", email=email)
+                new_pin = PIN(expiryDate=str(expiryDate), pin=pin, username="NotRegisteredUser", email=email)
                 db.session.add(new_pin)
                 db.session.commit()
 
@@ -538,6 +548,9 @@ def addItemsToPIN():
     addtoItemsDB(email)
     get_pin = PIN.query.filter_by(email=email).first()
     pin = get_pin.pin
+
+    # if main exceed quota, use "RecycleIT.side@gmail.com"
+    # pw: "ugnjnyqqrwsuirhn"
 
     email_sender = "RecycleIT.main@gmail.com"
     email_password = "oigpybczvniwkbux"
@@ -623,6 +636,9 @@ def alertUser(email):
     today = datetime.datetime.now().date()
     today1=  datetime.datetime.strptime(str(today), "%Y-%m-%d")
     difference = expirydate - today1
+
+    # if main exceed quota, use "RecycleIT.side@gmail.com"
+    # pw: "ugnjnyqqrwsuirhn"
 
     email_sender = "RecycleIT.main@gmail.com"
     email_password = "oigpybczvniwkbux"

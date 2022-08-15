@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-ManageUsers
+ManageItems
 {% endblock %}
 
 
@@ -41,7 +41,7 @@ ManageUsers
                             <td><strong>Expired</strong></td>
                         {% endif %}
                         <td>{{ i.expiryDate }}</td>
-                        {% if daysToExpire[index] < 11 %}
+                        {% if daysToExpire[index] < 5 %}
                             <td><a href="{{url_for('alertUser', email=i.email)}}" class="filled-button" style="padding: 6px 15px; margin-left:10px;">Alert User</a></p></td>
                         {% else %}
                             <td></td>
