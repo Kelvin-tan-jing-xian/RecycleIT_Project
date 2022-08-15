@@ -11,7 +11,13 @@ Unlock Bin
 {% block content %}
 
 <div class="unlockBin">
-    {% if correct == True %}
+    {% if expired == True %}
+        <h3>you have a pin already!</h3>
+        <p>We are sorry but <strong style="font-size: large;">your PIN has expired!</strong></p>
+        <p>You will have to scan all your items again to get a new PIN <br>
+            <a href="/#scanner">Scan items</a> 
+        </p>
+    {% elif correct == True %}
         <div class="col-sm-12">
             <h3>The bin is unlock!</h3>
             <p>You can now throw your items in the bin!</p>
@@ -24,64 +30,63 @@ Unlock Bin
             </div>
         </div>
     {% else %}
-
-    <h3>Unlock the bin</h3>
-    <div class="row">
-        {% if correct == False %}
-            <div class="alert alert-danger alert-dismissable" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="close">
-                    <span aria-hidden="true">x</span>
-                </button>
-                You have entered an incorrect PIN
-            </div>
-        {% endif %}
-        <p>Enter the PIN sent to your email:</p>
-        {% if correct == None or correct == False %}
-        <div class="col-sm-12">
-            <form action="/unlockBin" method="POST">
-                <input type="hidden" name="id" value="{{user.email}}">
-                <div class="col-sm-4"></div>
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="number" min="0" max="9" class="form-control" name="num1">
-                    </div>
+        <h3>Unlock the bin</h3>
+        <div class="row">
+            {% if correct == False %}
+                <div class="alert alert-danger alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                    You have entered an incorrect PIN
                 </div>
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="number" min="0" max="9" class="form-control" name="num2">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="number" min="0" max="9" class="form-control" name="num3">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="number" min="0" max="9" class="form-control" name="num4">
-                    </div>
-                </div>
-                <div class="col-sm-4"></div>
-                <div class="col-sm-12"><br></div>
-                {% if user.is_authenticated == False %}
-                        <div class="col-sm-3"></div>
+            {% endif %}
+            <p>Enter the PIN sent to your email:</p>
+            {% if correct == None or correct == False %}
+            <div class="col-sm-12">
+                <form action="/unlockBin" method="POST">
+                    <input type="hidden" name="id" value="{{user.email}}">
+                    <div class="col-sm-4"></div>
+                    <div class="form-group">
                         <div class="col-sm-1">
-                            <h6 class="mb-0">Email</h6>
+                            <input type="number" min="0" max="9" class="form-control" name="num1">
                         </div>
-                        <div class="col-sm-4 text-secondary">
-                            <input type="text" class="form-control" name="email">
-                        </div>
-                        <br>
-                {% endif %}
-                <div class="col-sm-12"><br></div>
-                <div class="form-group" style="padding:10px;">
-                    <div class="col-md-5"></div>
-                    <div class="col-md-2">
-                        <button type="submit" style="border: none; background-color: transparent;"><a class="filled-button">Submit</a></button>
                     </div>
-                </div>
-            </form>
-        </div>
+                    <div class="form-group">
+                        <div class="col-sm-1">
+                            <input type="number" min="0" max="9" class="form-control" name="num2">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-1">
+                            <input type="number" min="0" max="9" class="form-control" name="num3">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-1">
+                            <input type="number" min="0" max="9" class="form-control" name="num4">
+                        </div>
+                    </div>
+                    <div class="col-sm-4"></div>
+                    <div class="col-sm-12"><br></div>
+                    {% if user.is_authenticated == False %}
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-1">
+                                <h6 class="mb-0">Email</h6>
+                            </div>
+                            <div class="col-sm-4 text-secondary">
+                                <input type="text" class="form-control" name="email">
+                            </div>
+                            <br>
+                    {% endif %}
+                    <div class="col-sm-12"><br></div>
+                    <div class="form-group" style="padding:10px;">
+                        <div class="col-md-5"></div>
+                        <div class="col-md-2">
+                            <button type="submit" style="border: none; background-color: transparent;"><a class="filled-button">Submit</a></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         {% endif %}
 
     {% endif %}

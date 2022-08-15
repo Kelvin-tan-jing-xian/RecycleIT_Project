@@ -11,13 +11,20 @@ Get PIN
 <div class="getPIN">
     {% if user.is_authenticated %}
         {% if hasPIN %}
-            <h3> you have a pin already! </h3>
-            <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
-            <p><strong>Don't worry!</strong> You will still get your points for the new batch of items added to your current PIN. 
-                <br>
-                <a href="/addItemsToPIN">Add items to current PIN</a> 
-            </p>
-            
+            {% if expired == True %}
+                <h3>you have a pin already!</h3>
+                <p>We are sorry but <strong style="font-size: large;">your PIN has expired!</strong></p>
+                <p>You will have to scan all your items again to get a new PIN <br>
+                    <a href="/#scanner">Scan items</a> 
+                </p>
+            {% else%}
+                <h3> you have a pin already! </h3>
+                <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
+                <p><strong>Don't worry!</strong> You will still get your points for the new batch of items added to your current PIN. 
+                    <br>
+                    <a href="/addItemsToPIN">Add items to current PIN</a> 
+                </p>
+            {% endif %}
         {% else %}
             <h3>Thank you for recycling!</h3>
             <p>The 4-digit PIN to access any of our bins has been sent to: {{ user.email }}.</p>
@@ -25,14 +32,20 @@ Get PIN
 
     {% else %}
         {% if hasPIN %}
-            {% if isRegistered == False %}
+            {% if expired == True %}
+                <h3>you have a pin already!</h3>
+                <p>We are sorry but <strong style="font-size: large;">your PIN has expired!</strong></p>
+                <p>You will have to scan all your items again to get a new PIN <br>
+                    <a href="/#scanner">Scan items</a> 
+                </p>
+            {% elif isRegistered == False %}
                 <h3> you have a pin already! </h3>
                 <p>You can still add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>
                 <p>However, since you did not register for an account with us, you <br><strong>will not recieve any points</strong> for your previous and current batch of items. 
                     <br>
                     <a href="/addItemsToPIN">Add items to current PIN</a> 
                 </p>
-            {% else %} <!-- user email is registered but never login -->
+            {% elif isRegistered == True %} <!-- user email is registered but never login -->
                 <h3>You have a pin already!</h3>
                 <p><strong>The email entered is registered.</strong></p>
                 <p>Please <strong><a href="{{ url_for('login') }}" >login</a></strong> and add more items to recycle along with the items that you have <br>previously scanned, by adding the new batch of items to your current PIN.</p>

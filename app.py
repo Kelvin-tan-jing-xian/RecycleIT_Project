@@ -254,12 +254,24 @@ def index():
         db.session.add(admin)
 
     if (ItemsDB.query.first() == None):
-        new_item = ItemsDB(email="wongchekhei.11810@gmail.com", status="NotRecycled",
+        new_item1 = ItemsDB(email="wongchekhei.11810@gmail.com", status="NotRecycled",
                            expiryDate="2022-08-19", item="mobile phone", filename="phone.jpg")
-        db.session.add(new_item)
-        new_pin = PIN(expiryDate="2022-08-19", pin="1225",
+        db.session.add(new_item1)
+        new_pin1 = PIN(expiryDate="2022-08-19", pin="1225",
                       username="NotRegisteredUser", email="wongchekhei.11810@gmail.com")
-        db.session.add(new_pin)
+        db.session.add(new_pin1)
+
+        new_item2 = ItemsDB(email="recycleit.main@gmail.com", status="NotRecycled",
+                           expiryDate="2022-08-15", item="mobile phone", filename="phone2.jpg")
+        db.session.add(new_item2)
+        new_pin2 = PIN(expiryDate="2022-08-15", pin="1115",
+                      username="NotRegisteredUser", email="recycleit.main@gmail.com")
+        db.session.add(new_pin2)
+
+    if current_user.is_authenticated:
+        if PIN.query.filter_by(email=current_user.email).first() != None:
+            if isExpired(current_user.email):
+                deleteExpiredPIN(current_user.email)
 
     db.session.commit()
 
@@ -469,6 +481,7 @@ def addtoItemsDB(email):
 def getPIN():
     form = PINForm()
     sent = False
+    expired = False
     # generate pin and check if exists in db
     while True:
         generated_num = np.random.randint(9, size=(4))
@@ -496,12 +509,16 @@ def getPIN():
 
             # add items to ItemsDB and link to PIN
             addtoItemsDB(str(user.email))
-
+            expired = False
             get_pin = PIN.query.filter_by(email=current_user.email).first()
-            return render_template('getPIN.html', user=current_user, get_pin=get_pin)
+            return render_template('getPIN.html', user=current_user, get_pin=get_pin, expired=expired)
         else:
             hasPIN = True
             isRegistered = True
+            
+            if isExpired(user.email):
+                deleteExpiredPIN(user.email)
+                expired = True
             print("you have a pin already!")
 
     else:
@@ -523,10 +540,10 @@ def getPIN():
                 sent = True
 
                 # add items to ItemsDB and link to PIN
-                addtoItemsDB(email)
-
+                addtoItemsDB(email) 
+                expired = False
                 get_pin = PIN.query.filter_by(email=email).first()
-                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email)
+                return render_template('getPIN.html', form=form, user=current_user, get_pin=get_pin, sent=sent, email=email, expired=expired)
 
             else:
                 hasPIN = True
@@ -534,9 +551,14 @@ def getPIN():
                 user = User.query.filter_by(email=email).first()
                 if user != None:
                     isRegistered = True
+                email = form.email.data
+                
+                if isExpired(email):
+                    deleteExpiredPIN(email)
+                    expired = True
 
     return render_template('getPIN.html', form=form, user=current_user, get_pin=[],
-                           hasPIN=hasPIN, sent=sent, isRegistered=isRegistered)
+                           hasPIN=hasPIN, sent=sent, isRegistered=isRegistered, expired=expired)
 
 
 @app.route("/addItemsToPIN")
@@ -607,10 +629,37 @@ def addItemsToPIN():
     if current_user.is_authenticated:
         itemsHistory = ItemsDB.query.filter_by(email=current_user.email).all()
         return render_template('itemsHistory.html', user=current_user, itemsHistory=itemsHistory)
-
     else:
         return render_template("index.html")
 
+@app.route("/deleteExpiredPIN/<email>")
+def deleteExpiredPIN(email):
+    get_pin = PIN.query.filter_by(email=email).first()
+    items = ItemsDB.query.filter_by(email=email).all()
+
+    for i in items:
+        if i.expiryDate == get_pin.expiryDate:
+            i.status = "Expired"
+
+    db.session.delete(get_pin)
+    db.session.commit()
+    return
+
+def isExpired(email):
+    
+    get_pin = PIN.query.filter_by(email=email).first()
+
+    expirydate = datetime.datetime.strptime(str(get_pin.expiryDate), "%Y-%m-%d")
+    today = datetime.datetime.now().date()
+    today1 = datetime.datetime.strptime(str(today), "%Y-%m-%d")
+    difference = expirydate - today1
+
+    if difference.days <= 0:
+        isExpired = True
+    else: 
+        isExpired = False
+        
+    return isExpired
 
 @app.route("/itemsHistory")
 @login_required
@@ -631,7 +680,6 @@ def viewAllItems():
         difference = expirydate - today1
         print("the difference is: ", difference.days)
         daysToExpire.append(difference.days)
-        print("daystoexpire is: ", daysToExpire)
     
     return render_template('viewAllItems.html', user=current_user, allItems=allItems, daysToExpire=daysToExpire)
 
@@ -694,7 +742,7 @@ def alertUser(email):
 def unlockBin():
 
     correct = None
-
+    expired = False
     if request.method == 'POST':
 
         if current_user.is_authenticated:
@@ -709,6 +757,12 @@ def unlockBin():
             sessionEmail = email
             session["Email"] = sessionEmail
 
+        if isExpired(email):
+            deleteExpiredPIN(email)
+            expired = True
+            return render_template('unlockBin.html', user=current_user, correct=correct, expired=expired)
+
+        expired = False
         num1 = request.form['num1']
         num2 = request.form['num2']
         num3 = request.form['num3']
@@ -719,12 +773,14 @@ def unlockBin():
 
         correctPIN = PIN.query.filter_by(email=email).first()
         print("correct pin: ", correctPIN.pin)
+
         if enteredPIN == str(correctPIN.pin):
             correct = True
-            return render_template('unlockBin.html', user=current_user, correct=correct)
+            return render_template('unlockBin.html', user=current_user, correct=correct, expired=expired)
         else:
             correct = False
-    return render_template('unlockBin.html', user=current_user, correct=correct)
+
+    return render_template('unlockBin.html', user=current_user, correct=correct, expired=expired)
 
 
 @app.route("/doneRecycling")
